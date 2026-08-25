@@ -15,27 +15,39 @@
 const ITEMS = [
   {
     id: "1",
-    title: "Elemento de ejemplo uno",
-    description: "Descripción corta del primer elemento de tu catálogo.",
-    meta: "Dato extra (ej. duración, precio, categoría...)",
+    title: "Fuga de agua",
+    description:
+      "Se reporta una fuga en la calle.",
+    colonia: "Centro",
+    tipo: "Fuga",
+    estado: "Pendiente",
   },
   {
     id: "2",
-    title: "Elemento de ejemplo dos",
-    description: "Descripción corta del segundo elemento de tu catálogo.",
-    meta: "Dato extra",
+    title: "Falta de suministro de agua",
+    description:
+      "Vecinos reportan falta de agua potable desde hace dos días.",
+    colonia: "Camino Real",
+    tipo: "Desabasto",
+    estado: "En revisión",
   },
   {
     id: "3",
-    title: "Elemento de ejemplo tres",
-    description: "Descripción corta del tercer elemento de tu catálogo.",
-    meta: "Dato extra",
+    title: "Baja presión",
+    description:
+      "Presenta presión muy baja.",
+    colonia: "El Centenario",
+    tipo: "Baja presión",
+    estado: "Pendiente",
   },
   {
     id: "4",
-    title: "Elemento de ejemplo cuatro",
-    description: "Descripción corta del cuarto elemento de tu catálogo.",
-    meta: "Dato extra",
+    title: "Fuga en toma domiciliaria",
+    description:
+      "Se detecto una fuga cerca de una toma domiciliaria.",
+    colonia: "Indeco",
+    tipo: "Fuga",
+    estado: "Atendido",
   },
 ];
 
