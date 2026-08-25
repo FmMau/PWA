@@ -37,9 +37,36 @@ export default class Router {
    *   matchRoute("/item/2") -> { route: <ruta /item/:id>, params: { id: "2" } }
    */
   matchRoute(path) {
-    const route = this.routes.find((r) => r.path === path);
-    if (!route) return null;
-    return { route, params: {} };
+    for (const route of this.routes) {
+      const routeParts = route.path.split("/").filter(Boolean);
+      const pathParts = path.split("/").filter(Boolean);
+
+      if (routeParts.length !== pathParts.length) {
+        continue;
+      }
+
+      const params = {};
+      let matches = true;
+
+      for (let i = 0; i < routeParts.length; i++) {
+        const routePart = routeParts[i];
+        const pathPart = pathParts[i];
+
+        if (routePart.startsWith(":")) {
+          const paramName = routePart.slice(1);
+          params[paramName] = pathPart;
+        } else if (routePart !== pathPart) {
+          matches = false;
+          break;
+        }
+      }
+
+      if (matches) {
+        return { route, params };
+      }
+    }
+
+    return null;
   }
 
   async render() {
@@ -56,7 +83,7 @@ export default class Router {
 
     const html = await match.route.view(match.params);
     this.root.innerHTML = html;
-    document.title = `Mi Catálogo — ${path}`;
+    document.title = `AquaPaz — ${path}`;
   }
 
   init() {
