@@ -1,56 +1,286 @@
-* {
-  box-sizing: border-box;
+.page {
+  width: 100%;
 }
 
-body {
-  font-family: system-ui, sans-serif;
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-eyebrow {
+  display: block;
+
+  margin-bottom: 0.35rem;
+
+  color: var(--blue);
+
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.06rem;
+}
+
+.page-header h2 {
   margin: 0;
-  color: #1e2761;
-  background: #f7f8fb;
+
+  color: var(--navy);
+
+  font-size: 1.7rem;
 }
 
-header {
-  background: #1e2761;
-  color: white;
-  padding: 1rem 2rem;
+.page-header p {
+  max-width: 40rem;
+
+  margin: 0.45rem 0 0;
+
+  color: var(--text);
+
+  line-height: 1.5;
 }
 
-nav a {
-  color: #cadcfc;
-  margin-right: 1.2rem;
-  text-decoration: none;
-  font-weight: 600;
-}
+/* KPIs */
 
-main#app {
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
-  min-height: 50vh;
-}
-
-footer {
-  text-align: center;
-  padding: 1rem;
-  color: #6b7280;
-  font-size: 0.85rem;
-}
-
-.card {
-  background: white;
-  border-radius: 10px;
-  padding: 1.25rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  margin-bottom: 1rem;
-}
-
-.grid {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  grid-template-columns: 1fr;
+
   gap: 1rem;
 }
 
+.stat-card,
+.dashboard-card,
+.card,
+.empty-state {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+
+  border-radius: 1.25rem;
+
+  box-shadow:
+    0 0.25rem 1.25rem rgba(16, 24, 43, 0.04);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.3rem;
+
+  padding: 1.25rem;
+}
+
+.stat-label {
+  color: var(--text);
+
+  font-size: 0.85rem;
+}
+
+.stat-value {
+  color: var(--navy);
+
+  font-size: 2rem;
+}
+
+.stat-description {
+  color: var(--muted);
+
+  font-size: 0.75rem;
+}
+
+/* DASHBOARD */
+
+.dashboard-grid {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 1rem;
+
+  margin-top: 1rem;
+}
+
+.dashboard-card {
+  padding: 1.25rem;
+}
+
+.section-title {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+}
+
+.section-title h3 {
+  margin: 0;
+
+  font-size: 1.05rem;
+}
+
+.section-title p {
+  margin: 0.25rem 0 0;
+
+  color: var(--text);
+
+  font-size: 0.8rem;
+}
+
+.section-title a {
+  flex-shrink: 0;
+
+  color: var(--blue);
+
+  text-decoration: none;
+
+  font-size: 0.85rem;
+
+  font-weight: 700;
+}
+
+.placeholder-content {
+  min-height: 13rem;
+
+  display: grid;
+  place-items: center;
+
+  margin-top: 1rem;
+
+  border-radius: 1rem;
+
+  background: var(--background);
+
+  color: var(--muted);
+}
+
+/* REPORTES */
+
+.report-preview {
+  display: flex;
+  flex-direction: column;
+
+  padding: 0.9rem 0;
+
+  border-bottom: 1px solid var(--border);
+}
+
+.report-preview:last-child {
+  border-bottom: none;
+}
+
+.report-preview strong {
+  font-size: 0.9rem;
+}
+
+.report-preview span {
+  margin-top: 0.2rem;
+
+  color: var(--text);
+
+  font-size: 0.8rem;
+}
+
+/* CARDS */
+
+.grid {
+  display: grid;
+
+  grid-template-columns: 1fr;
+
+  gap: 1rem;
+}
+
+.card {
+  padding: 1.25rem;
+}
+
+.card h3 {
+  margin-top: 0;
+
+  color: var(--navy);
+}
+
+.card p {
+  color: var(--text);
+
+  line-height: 1.5;
+}
+
 .card a {
-  color: #1e2761;
-  font-weight: 600;
+  color: var(--blue);
+
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+/* EMPTY VIEWS */
+
+.empty-state {
+  min-height: 20rem;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 2rem;
+
+  text-align: center;
+}
+
+.empty-icon {
+  margin-bottom: 1rem;
+
+  color: var(--blue);
+
+  font-size: 2.5rem;
+}
+
+.empty-state h3 {
+  margin: 0;
+}
+
+.empty-state p {
+  max-width: 25rem;
+
+  margin-bottom: 0;
+
+  color: var(--text);
+}
+
+/* TABLET */
+
+@media (min-width: 40rem) {
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+/* DESKTOP */
+
+@media (min-width: 70rem) {
+
+  .dashboard-grid {
+    grid-template-columns:
+      minmax(0, 1.4fr)
+      minmax(18rem, 0.6fr);
+  }
+
+  .grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
 }

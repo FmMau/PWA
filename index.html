@@ -3,24 +3,143 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AquaPaz</title>
+
+  <title>AquaPaz | Centro de Control</title>
+
+  <link rel="stylesheet" href="styles/shell.css" />
   <link rel="stylesheet" href="styles/main.css" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  />
 </head>
+
 <body>
-  <header>
-    <h1>AquaPaz</h1>
-    <nav>
-      <a href="/" data-link>Inicio</a>
-      <a href="/acerca" data-link>Acerca de</a>
-    </nav>
-  </header>
 
-  <main id="app">Cargando...</main>
+  <div class="app-shell">
 
-  <footer>
-    <p>AquaPaz — Mini SPA / Unidad 1, Ejercicio 3</p>
-  </footer>
+    <aside class="sidebar">
+
+      <div class="brand">
+
+        <div class="brand-icon">
+          <i class="fa-solid fa-droplet"></i>
+        </div>
+
+        <div class="brand-text">
+          <h1>AquaPaz</h1>
+          <span>Centro de Control</span>
+        </div>
+
+      </div>
+
+      <nav class="sidebar-nav">
+
+        <a href="/" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-house"></i>
+          </span>
+          <span>Resumen</span>
+        </a>
+
+        <a href="/mapa" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-map"></i>
+          </span>
+          <span>Mapa</span>
+        </a>
+
+        <a href="/reportes" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </span>
+          <span>Reportes</span>
+        </a>
+
+        <a href="/suministro" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-faucet-drip"></i>
+          </span>
+          <span>Suministro</span>
+        </a>
+
+        <a href="/pipas" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-truck-droplet"></i>
+          </span>
+          <span>Pipas</span>
+        </a>
+
+        <a href="/estadisticas" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-chart-column"></i>
+          </span>
+          <span>Estadísticas</span>
+        </a>
+
+        <div class="nav-separator"></div>
+
+        <a href="/acerca" data-link>
+          <span class="nav-icon">
+            <i class="fa-solid fa-circle-info"></i>
+          </span>
+          <span>Acerca de</span>
+        </a>
+
+      </nav>
+
+    </aside>
+
+    <div class="app-container">
+
+      <header class="topbar">
+
+        <div>
+          <p class="topbar-eyebrow">AquaPaz</p>
+          <span class="topbar-title">
+            Gestión del suministro de agua
+          </span>
+        </div>
+
+        <div class="topbar-actions">
+
+          <button class="notification-button" aria-label="Notificaciones">
+            <i class="fa-regular fa-bell"></i>
+          </button>
+
+          <div class="user-info">
+            <div class="user-avatar">
+              A
+            </div>
+
+            <div>
+              <strong>Administrador</strong>
+              <span>Centro de Control</span>
+            </div>
+          </div>
+
+        </div>
+
+      </header>
+
+      <main id="app">
+
+        <div class="loading">
+          <div class="loading-circle"></div>
+          <p>Cargando información...</p>
+        </div>
+
+      </main>
+
+      <footer>
+        AquaPaz · Centro de Control
+      </footer>
+
+    </div>
+
+  </div>
 
   <script type="module" src="src/main.js"></script>
+
 </body>
 </html>
