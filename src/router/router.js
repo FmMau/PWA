@@ -1,10 +1,3 @@
-/**
- * Router — enrutador de cliente basado en la History API.
- *
- * Estado actual: SOLO soporta rutas EXACTAS (route.path === path).
- * TODO (Ejercicio - Parte A, punto 1): agrega soporte para rutas con
- * parámetros, como "/item/:id", dentro de matchRoute().
- */
 export default class Router {
   constructor(routes, rootElement) {
     this.routes = routes;
@@ -25,17 +18,6 @@ export default class Router {
     this.render();
   }
 
-  /**
-   * Debe devolver { route, params } si alguna ruta coincide con "path",
-   * o null si ninguna coincide.
-   *
-   * Ahora mismo SOLO compara de forma exacta, por lo que "/item/1" no
-   * hace match con la ruta definida como "/item/:id".
-   *
-   * TODO: soporta segmentos dinámicos (":id") y regresa también los
-   * parámetros capturados, ej:
-   *   matchRoute("/item/2") -> { route: <ruta /item/:id>, params: { id: "2" } }
-   */
   matchRoute(path) {
     for (const route of this.routes) {
       const routeParts = route.path.split("/").filter(Boolean);
@@ -71,18 +53,32 @@ export default class Router {
 
   async render() {
     const path = window.location.pathname;
+
+    this.root.innerHTML = `
+      <div class="loading">
+        <div class="loading-circle"></div>
+        <p>Cargando información...</p>
+      </div>
+    `;
+
+    // Para simular un retraso al cargar y poder ver la animación
+    //await new Promise((resolve) => setTimeout(resolve, 500));
+
     const match = this.matchRoute(path);
 
     if (!match) {
       const { default: NotFoundView } = await import(
         "../views/NotFoundView.js"
       );
+
       this.root.innerHTML = NotFoundView();
       return;
     }
 
     const html = await match.route.view(match.params);
+
     this.root.innerHTML = html;
+
     document.title = `AquaPaz — ${path}`;
   }
 
