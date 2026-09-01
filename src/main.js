@@ -8,6 +8,7 @@ import TrucksView from "./views/TrucksView.js";
 import StatisticsView from "./views/StatisticsView.js";
 import AboutView from "./views/AboutView.js";
 import ItemDetailView from "./views/ItemDetailView.js";
+import WeatherView from "./views/WeatherView.js";
 
 const routes = [
   {
@@ -41,6 +42,10 @@ const routes = [
   {
     path: "/item/:id",
     view: ItemDetailView,
+  },
+  {
+    path: "/clima",
+    view: WeatherView,
   },
 ];
 
