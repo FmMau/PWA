@@ -102,12 +102,6 @@ export default async function WeatherView() {
             </div>
 
           </div>
-
-          <div class="weather-update">
-            <span>Última actualización</span>
-            <strong>${formatDate(weather.time)}</strong>
-          </div>
-
         </section>
 
 
@@ -115,28 +109,39 @@ export default async function WeatherView() {
           ${cards}
         </div>
 
-
-        <section class="weather-info-card">
-
-          <div class="weather-info-icon">
-            <i class="fa-solid fa-circle-info"></i>
-          </div>
-
-          <div>
-            <h3>Datos meteorológicos</h3>
-
-            <p>
-              La información mostrada en esta sección se obtiene
-              dinámicamente mediante la API REST de Open-Meteo.
-            </p>
-          </div>
-
-        </section>
-
       </section>
     `;
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener el clima:", error);
+
+    let title = "No se pudo cargar la información";
+
+    let message =
+      "Ocurrió un problema inesperado al consultar el clima.";
+
+    // Timeout
+    if (error.name === "AbortError") {
+      title = "La solicitud tardó demasiado";
+
+      message =
+        "El servidor no respondió dentro del tiempo esperado. Intenta nuevamente.";
+    }
+
+    // Error de red o CORS
+    else if (error instanceof TypeError) {
+      title = "Problema de conexión";
+
+      message =
+        "No fue posible conectarse al servicio meteorológico. Revisa tu conexión a Internet.";
+    }
+
+    // Error HTTP
+    else if (error.name === "HttpError") {
+      title = "Error del servidor";
+
+      message =
+        `El servidor respondió con el código ${error.status}. Intenta nuevamente más tarde.`;
+    }
 
     return `
       <section class="page">
@@ -147,10 +152,6 @@ export default async function WeatherView() {
           </span>
 
           <h2>Clima en La Paz</h2>
-
-          <p>
-            Consulta de condiciones meteorológicas actuales.
-          </p>
         </div>
 
         <div class="api-error">
@@ -159,15 +160,19 @@ export default async function WeatherView() {
             <i class="fa-solid fa-circle-exclamation"></i>
           </div>
 
-          <h3>No se pudo cargar la información</h3>
+          <h3>
+            ${title}
+          </h3>
 
           <p>
-            ${error.message}
+            ${message}
           </p>
 
           <button
             class="retry-button"
-            onclick="window.dispatchEvent(new PopStateEvent('popstate'))"
+            onclick="window.dispatchEvent(
+              new PopStateEvent('popstate')
+            )"
           >
             Intentar nuevamente
           </button>
@@ -177,18 +182,4 @@ export default async function WeatherView() {
       </section>
     `;
   }
-}
-
-
-function formatDate(dateString) {
-  if (!dateString) {
-    return "No disponible";
-  }
-
-  const date = new Date(dateString);
-
-  return new Intl.DateTimeFormat("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
 }
