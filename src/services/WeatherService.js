@@ -10,20 +10,77 @@ export default class WeatherService {
       `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m` +
       `&timezone=America%2FMazatlan`;
 
-    const response = await fetch(url);
+    // 1 intento + 1 reintento
+    const maxAttempts = 2;
 
-    if (!response.ok) {
-      throw new Error(
-        `Error al consultar el clima. Código: ${response.status}`
-      );
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await this.fetchWithTimeout(url, 5000);
+      } catch (error) {
+        // Timeout no reintentar
+        if (error.name === "AbortError") {
+          throw error;
+        }
+
+        // Error HTTP no reintentar
+        if (error.name === "HttpError") {
+          throw error;
+        }
+
+        // Errores de red / CORS
+        if (error instanceof TypeError) {
+          if (attempt < maxAttempts) {
+            console.log(
+              `Error de red. Reintentando petición... Intento ${attempt + 1}`
+            );
+
+            continue;
+          }
+
+          throw error;
+        }
+
+        throw error;
+      }
     }
+  }
 
-    const data = await response.json();
 
-    if (!data.current) {
-      throw new Error("La API no regresó información meteorológica.");
+  static async fetchWithTimeout(url, timeout = 5000) {
+    const controller = new AbortController();
+
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+      });
+
+      // Error HTTP del servidor
+      if (!response.ok) {
+        const error = new Error(
+          `El servidor respondió con el código ${response.status}`
+        );
+
+        error.name = "HttpError";
+        error.status = response.status;
+
+        throw error;
+      }
+
+      const data = await response.json();
+
+      if (!data.current) {
+        throw new Error(
+          "La API no regresó información meteorológica válida."
+        );
+      }
+
+      return data;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return data;
   }
 }
