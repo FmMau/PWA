@@ -75,11 +75,21 @@ export default class Router {
       return;
     }
 
-    const html = await match.route.view(match.params);
+    const viewModule = match.route.view;
 
-    this.root.innerHTML = html;
+    if (typeof viewModule === "object" && typeof viewModule.template === "function") {
+      this.root.innerHTML = viewModule.template(match.params);
+      document.title = `AquaPaz — ${path}`;
 
-    document.title = `AquaPaz — ${path}`;
+      if (typeof viewModule.init === "function") {
+        await viewModule.init(this.root, match.params);
+      }
+
+    } else {
+      const html = await viewModule(match.params);
+      this.root.innerHTML = html;
+      document.title = `AquaPaz — ${path}`;
+    }
   }
 
   init() {
