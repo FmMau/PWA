@@ -83,6 +83,7 @@ export default class Router {
   }
 
   init() {
+    initTheme();
     this.render();
   }
 }

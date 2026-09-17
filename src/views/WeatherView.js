@@ -1,3 +1,44 @@
+import {
+  getSessionStorage,
+  setSessionStorage,
+} from "../utils/storage.js";
+
+let weatherFilterListenerInitialized = false;
+
+export function initWeatherFilters() {
+  if (weatherFilterListenerInitialized) {
+    return;
+  }
+
+  weatherFilterListenerInitialized = true;
+
+  document.addEventListener(
+    "click",
+    (event) => {
+      const button =
+        event.target.closest(
+          "[data-weather-filter]"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      const filter =
+        button.dataset.weatherFilter;
+
+      setSessionStorage(
+        "aquapaz-weather-filter",
+        filter
+      );
+
+      window.dispatchEvent(
+        new PopStateEvent("popstate")
+      );
+    }
+  );
+}
+
 export default async function WeatherView() {
   try {
     const { default: WeatherService } = await import(
@@ -7,6 +48,11 @@ export default async function WeatherView() {
     const data = await WeatherService.getCurrentWeather();
 
     const weather = data.current;
+    const savedFilter =
+      getSessionStorage(
+        "aquapaz-weather-filter",
+        "all"
+      );
     const units = data.current_units;
 
     const weatherItems = [
@@ -15,28 +61,40 @@ export default async function WeatherView() {
         label: "Temperatura",
         value: weather.temperature_2m,
         unit: units.temperature_2m,
+        category: "temperature",
       },
       {
         icon: "fa-droplet",
         label: "Humedad",
         value: weather.relative_humidity_2m,
         unit: units.relative_humidity_2m,
+        category: "water",
       },
       {
         icon: "fa-cloud-rain",
         label: "Precipitación",
         value: weather.precipitation,
         unit: units.precipitation,
+        category: "water",
       },
       {
         icon: "fa-wind",
         label: "Velocidad del viento",
         value: weather.wind_speed_10m,
         unit: units.wind_speed_10m,
+        category: "wind",
       },
     ];
 
-    const cards = weatherItems
+    const filteredItems =
+      savedFilter === "all"
+        ? weatherItems
+        : weatherItems.filter(
+            (item) =>
+              item.category === savedFilter
+          );
+
+    const cards = filteredItems
       .map(
         (item) => `
           <article class="weather-card">
@@ -103,6 +161,39 @@ export default async function WeatherView() {
 
           </div>
         </section>
+
+
+        <div class="weather-filters">
+
+          <button
+            class="weather-filter ${savedFilter === "all" ? "active" : ""}"
+            data-weather-filter="all"
+          >
+            Todos
+          </button>
+
+          <button
+            class="weather-filter ${savedFilter === "temperature" ? "active" : ""}"
+            data-weather-filter="temperature"
+          >
+            Temperatura
+          </button>
+
+          <button
+            class="weather-filter ${savedFilter === "water" ? "active" : ""}"
+            data-weather-filter="water"
+          >
+            Agua
+          </button>
+
+          <button
+            class="weather-filter ${savedFilter === "wind" ? "active" : ""}"
+            data-weather-filter="wind"
+          >
+            Viento
+          </button>
+
+        </div>
 
 
         <div class="weather-grid">

@@ -8,7 +8,16 @@ import TrucksView from "./views/TrucksView.js";
 import StatisticsView from "./views/StatisticsView.js";
 import AboutView from "./views/AboutView.js";
 import ItemDetailView from "./views/ItemDetailView.js";
-import WeatherView from "./views/WeatherView.js";
+import WeatherView, {
+  initWeatherFilters,
+} from "./views/WeatherView.js";
+import DiagnosticsView, {
+  initDiagnostics,
+} from "./views/DiagnosticsView.js";
+import { initTheme } from "./utils/theme.js";
+import {
+  registerVisit,
+} from "./utils/visitCookie.js";
 
 const routes = [
   {
@@ -47,10 +56,18 @@ const routes = [
     path: "/clima",
     view: WeatherView,
   },
+  {
+    path: "/diagnostico",
+    view: DiagnosticsView,
+  },
 ];
 
 const app = document.getElementById("app");
 
 const router = new Router(routes, app);
 
+registerVisit();
+initTheme();
+initWeatherFilters();
+initDiagnostics();
 router.init();
