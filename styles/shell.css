@@ -129,6 +129,12 @@ a {
   margin-top: 1rem;
 
   overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar-nav a {
@@ -369,6 +375,10 @@ footer {
 
   .sidebar-nav a {
     width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
   }
 
   .nav-separator {

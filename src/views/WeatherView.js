@@ -101,7 +101,6 @@ export default async function WeatherView() {
             <div class="weather-card-icon">
               <i class="fa-solid ${item.icon}"></i>
             </div>
-
             <div class="weather-card-content">
               <span class="weather-card-label">
                 ${item.label}
