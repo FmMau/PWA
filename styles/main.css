@@ -1078,4 +1078,7 @@
   to { transform: rotate(360deg); }
 }
 
-
+
+.truck-filter { max-width: 22rem; margin-bottom: 1.5rem; }
+.truck-card { overflow-wrap: anywhere; }
+.truck-card button { margin-top: 1rem; }

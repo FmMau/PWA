@@ -12,7 +12,7 @@ export default function ItemCard(item) {
       <p><strong>Tipo:</strong> ${item.tipo}</p>
       <p><strong>Estado:</strong> ${item.estado}</p>
 
-      <a href="/item/${item.id}" data-link>
+      <a href="#/item/${item.id}" data-link>
         Ver reporte →
       </a>
     </article>

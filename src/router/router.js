@@ -8,13 +8,14 @@ export default class Router {
     document.addEventListener("click", (event) => {
       const link = event.target.closest("[data-link]");
       if (!link) return;
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       this.navigate(link.getAttribute("href"));
     });
   }
 
   navigate(path) {
-    window.history.pushState({}, "", path);
+    window.history.pushState({}, "", path.startsWith("#") ? path : `#${path}`);
     this.render();
   }
 
@@ -52,7 +53,7 @@ export default class Router {
   }
 
   async render() {
-    const path = window.location.pathname;
+    const path = window.location.hash.slice(1) || "/";
 
     this.root.innerHTML = `
       <div class="loading">

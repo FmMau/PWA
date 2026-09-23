@@ -71,7 +71,7 @@ export default async function DashboardView() {
               <p>Situación actual por zona</p>
             </div>
 
-            <a href="/mapa" data-link>
+            <a href="#/mapa" data-link>
               Ver mapa →
             </a>
           </div>
@@ -88,7 +88,7 @@ export default async function DashboardView() {
               <p>Últimas incidencias ciudadanas</p>
             </div>
 
-            <a href="/reportes" data-link>
+            <a href="#/reportes" data-link>
               Ver todos →
             </a>
           </div>

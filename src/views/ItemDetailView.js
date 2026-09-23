@@ -30,7 +30,7 @@ export default async function ItemDetailView(params) {
       <div class="card">
         <h2>Reporte no encontrado</h2>
         <p>No existe un reporte con el identificador solicitado.</p>
-        <a href="/" data-link>← Volver a los reportes</a>
+        <a href="#/" data-link>← Volver a los reportes</a>
       </div>
     `;
   }
@@ -56,7 +56,7 @@ export default async function ItemDetailView(params) {
         ${report.estado}
       </p>
 
-      <a href="/" data-link>
+      <a href="#/" data-link>
         ← Volver a los reportes
       </a>
     </div>
