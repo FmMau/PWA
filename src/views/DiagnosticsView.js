@@ -1,3 +1,4 @@
+import { serviceWorkerPanel, initSWDiagnostics } from '../pwa/diagnostics.js';
 import {
   getLocalStorage,
   getSessionStorage,
@@ -10,7 +11,7 @@ import {
   deleteCookie,
 } from "../utils/cookies.js";
 
-export default function DiagnosticsView() {
+export default async function DiagnosticsView() {
   const theme =
     getLocalStorage(
       "aquapaz-theme",
@@ -70,6 +71,7 @@ export default function DiagnosticsView() {
 
       </div>
 
+      ${await serviceWorkerPanel()}
     </section>
   `;
 }
@@ -139,6 +141,7 @@ export function initDiagnostics() {
   }
 
   diagnosticsInitialized = true;
+  initSWDiagnostics();
 
   document.addEventListener(
     "click",

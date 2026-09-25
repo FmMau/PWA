@@ -1,4 +1,6 @@
 import Router from "./router/router.js";
+import { registerSW } from "./pwa/registerSW.js";
+window.addEventListener("load", registerSW, { once: true });
 
 import DashboardView from "./views/DashboardView.js";
 import MapView from "./views/MapView.js";

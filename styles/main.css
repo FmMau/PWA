@@ -1082,3 +1082,19 @@
 .truck-filter { max-width: 22rem; margin-bottom: 1.5rem; }
 .truck-card { overflow-wrap: anywhere; }
 .truck-card button { margin-top: 1rem; }
+
+/* Diagnóstico de Service Workers */
+.sw-panel { margin-top: 2rem; padding: 1.5rem; border: 1px solid #8b9bad; border-radius: 16px; }
+.sw-panel h3 { margin-top: 1.5rem; }
+.sw-panel p { margin: 1rem 0; line-height: 1.6; }
+.sw-facts { display: grid; grid-template-columns: minmax(170px, 1fr) 2fr; gap: .65rem 1rem; margin: 1.25rem 0; }
+.sw-facts dt { font-weight: 600; }
+.sw-facts dd { margin: 0; overflow-wrap: anywhere; }
+.sw-table-wrap { overflow-x: auto; }
+.sw-panel table { width: 100%; border-collapse: collapse; }
+.sw-panel th, .sw-panel td { padding: .75rem; text-align: left; border-bottom: 1px solid #8b9bad; overflow-wrap: anywhere; }
+.sw-panel td:nth-child(2) { min-width: 200px; }
+.sw-actions { display: flex; flex-wrap: wrap; gap: .75rem; }
+.sw-panel pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 1rem; border: 1px solid #8b9bad; border-radius: 8px; }
+.sw-panel li { overflow-wrap: anywhere; margin: .5rem 0; }
+@media (max-width: 600px) { .sw-facts { grid-template-columns: 1fr; } }
