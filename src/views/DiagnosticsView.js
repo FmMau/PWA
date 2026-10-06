@@ -1,4 +1,5 @@
 import { serviceWorkerPanel, initSWDiagnostics } from '../pwa/diagnostics.js';
+import { cacheDebugPanel, initCacheDebug } from '../pwa/cacheDebug.js';
 import {
   getLocalStorage,
   getSessionStorage,
@@ -72,6 +73,7 @@ export default async function DiagnosticsView() {
       </div>
 
       ${await serviceWorkerPanel()}
+      ${cacheDebugPanel()}
     </section>
   `;
 }
@@ -142,6 +144,7 @@ export function initDiagnostics() {
 
   diagnosticsInitialized = true;
   initSWDiagnostics();
+  initCacheDebug();
 
   document.addEventListener(
     "click",
