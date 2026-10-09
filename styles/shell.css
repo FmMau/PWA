@@ -432,3 +432,5 @@ footer {
 .storage-warning i {
   color: var(--blue);
 }
+.connection-status { font-size: .8rem; padding: .45rem .7rem; border-radius: .6rem; background: #dcfce7; color: #14532d; max-width: 240px; }
+.connection-status[data-offline="true"] { background: #fef3c7; color: #78350f; }

@@ -1,4 +1,5 @@
 import Router from "./router/router.js";
+import { initConnectionStatus } from './pwa/connectionStatus.js';
 import { registerSW } from "./pwa/registerSW.js";
 window.addEventListener("load", registerSW, { once: true });
 
@@ -70,6 +71,7 @@ const router = new Router(routes, app);
 
 registerVisit();
 initTheme();
+initConnectionStatus();
 initWeatherFilters();
 initDiagnostics();
 router.init();

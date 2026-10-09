@@ -1,74 +1,95 @@
-console.info('[SW] Se ejecutó el Service Worker');
-console.info('[SW] Contexto global:', self.constructor.name);
-console.info('[SW] typeof window:', typeof window);
-console.info('[SW] typeof document:', typeof document);
-console.info('[SW] typeof localStorage:', typeof localStorage);
-console.info('[SW] Scope:', self.registration.scope);
-
-const CACHE_VERSION = 'aquapaz-app-shell-v3';
+const CACHE_VERSION = 'aquapaz-app-shell-v4';
 const APP_BASE = new URL('./', self.location.href);
-const APP_SHELL = [
-  'index.html',
-  'styles/shell.css',
-  'styles/main.css',
-  'src/main.js',
-  'src/router/router.js',
-  'src/pwa/registerSW.js',
-  'src/utils/theme.js',
-  'src/utils/storage.js',
-  'src/utils/visitCookie.js',
-  'src/utils/cookies.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css',
-].map((resource) => new URL(resource, APP_BASE).href);
-
-self.addEventListener('install', (event) => {
+const LOCAL_RESOURCES = [
+  'index.html', 'styles/shell.css', 'styles/main.css', 'src/main.js', 'src/router/router.js',
+  ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug'].map(n => `src/pwa/${n}.js`),
+  'src/components/ItemCard.js',
+  ...['About', 'Dashboard', 'Diagnostics', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks', 'Weather'].map(n => `src/views/${n}View.js`),
+  ...['WeatherService', 'dbService', 'itemsService', 'truckDbService'].map(n => `src/services/${n}.js`),
+  ...['cookies', 'slugify', 'storage', 'theme', 'visitCookie'].map(n => `src/utils/${n}.js`),
+  'src/vendor/idb.js', 'data/cache-demo.json', 'data/avisos.json',
+];
+const ICON_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/';
+const EXTERNAL_RESOURCES = [`${ICON_BASE}css/all.min.css`,
+  ...['fa-solid-900', 'fa-regular-400', 'fa-brands-400'].map(n => `${ICON_BASE}webfonts/${n}.woff2`)];
+const APP_SHELL = [...LOCAL_RESOURCES.map(p => new URL(p, APP_BASE).href), ...EXTERNAL_RESOURCES];
+self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_VERSION);
-    await cache.addAll(APP_SHELL);
-    console.info('[SW] App Shell precacheado:', CACHE_VERSION, APP_SHELL);
+    await (await caches.open(CACHE_VERSION)).addAll(APP_SHELL);
+    console.info('[SW] Precaching completo', CACHE_VERSION, APP_SHELL);
+    await self.skipWaiting();
   })());
 });
-
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const names = await caches.keys();
-    console.info('[SW] Cachés existentes:', names);
-    await Promise.all(names.filter((name) => name.startsWith('aquapaz-app-shell-') && name !== CACHE_VERSION).map(async (name) => {
-      await caches.delete(name);
-      console.info('[SW] Caché anterior eliminada:', name);
-    }));
-    console.info('[SW] Versión activa:', CACHE_VERSION);
+    await Promise.all(names.filter(n => n.startsWith('aquapaz-app-shell-') && n !== CACHE_VERSION).map(n => caches.delete(n)));
     await self.clients.claim();
+    console.info('[SW] Versión activa', CACHE_VERSION);
   })());
 });
-
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
   if (event.data?.type === 'CACHE_VERSION') event.ports[0]?.postMessage(CACHE_VERSION);
 });
-
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  // Solo GET, las operaciones que modifican datos no deben responderse desde caché
-  if (request.method !== 'GET') return;
-  // Solo el mismo origen, los servicios externos conservan su comportamiento de red
-  if (new URL(request.url).origin !== self.location.origin) return;
-
-  // Todas las navegaciones usan una unica entrada del App Shell, sin duplicar rutas
-  const key = request.mode === 'navigate' ? new URL('index.html', APP_BASE).href : request;
-  const responsePromise = (async () => {
-    const cache = await caches.open(CACHE_VERSION);
-    const cached = await cache.match(key);
-    console.info(cached ? '[SW] HIT' : '[SW] MISS', request.url);
-    if (cached) return { response: cached };
-    const response = await fetch(key);
-    // Clonar antes de entregar el body al navegador
-    return { response, copy: response.ok ? response.clone() : null };
+function emergency(request) {
+  const url = new URL(request.url);
+  const json = url.pathname.endsWith('.json') || url.hostname === 'api.open-meteo.com';
+  return new Response(json ? JSON.stringify({ error: 'Sin conexión y sin datos guardados.' }) : 'AquaPaz: recurso no disponible sin conexión.', {
+    status: 503, headers: { 'Content-Type': json ? 'application/json; charset=utf-8' : 'text/plain; charset=utf-8' },
+  });
+}
+async function fromNetwork(request) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3500);
+  try {
+    const response = await fetch(request, { cache: 'no-store', signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    await (await caches.open(CACHE_VERSION)).put(request, response.clone());
+    return response;
+  } finally { clearTimeout(timeout); }
+}
+async function cacheFirst(request) {
+  const cached = await (await caches.open(CACHE_VERSION)).match(request);
+  console.info('[SW] Cache First', cached ? 'caché' : 'red', request.url);
+  return cached || await fromNetwork(request).catch(() => emergency(request));
+}
+async function networkFirst(request) {
+  try {
+    const response = await fromNetwork(request);
+    console.info('[SW] Network First: red', request.url);
+    return response;
+  } catch {
+    const cached = await (await caches.open(CACHE_VERSION)).match(request);
+    console.info('[SW] Network First:', cached ? 'caché' : '503', request.url);
+    return cached || emergency(request);
+  }
+}
+function staleWhileRevalidate(request, event) {
+  // waitUntil debe registrarse durante, antes de cualquier await.
+  const update = fromNetwork(request).catch(() => null);
+  event.waitUntil(update);
+  return (async () => {
+    const cached = await (await caches.open(CACHE_VERSION)).match(request);
+    console.info('[SW] SWR:', cached ? 'caché y actualización' : 'red', request.url);
+    return cached || await update || emergency(request);
   })();
-  event.respondWith(responsePromise.then(({ response }) => response));
-  // Se registra durante el evento para mantener vivo el SW hasta terminar cache.put
-  event.waitUntil(responsePromise.then(async ({ copy }) => {
-    if (!copy) return; // Los errores no deben persistir ni ocultar una recuperación
-    const cache = await caches.open(CACHE_VERSION);
-    await cache.put(key, copy);
-  }).catch((error) => console.warn('[SW] No se pudo guardar el recurso:', request.url, error)));
+}
+function strategyFor(request) {
+  const url = new URL(request.url);
+  if (request.method !== 'GET') return null;
+  if (url.origin === APP_BASE.origin && url.pathname.startsWith(APP_BASE.pathname)) {
+    if (url.pathname === new URL('data/cache-demo.json', APP_BASE).pathname) return networkFirst;
+    if (url.pathname === new URL('data/avisos.json', APP_BASE).pathname) return staleWhileRevalidate;
+    return cacheFirst;
+  }
+  if (EXTERNAL_RESOURCES.includes(url.href)) return cacheFirst;
+  if (url.origin === 'https://api.open-meteo.com' && url.pathname === '/v1/forecast') return networkFirst;
+  return null;
+}
+self.addEventListener('fetch', event => {
+  const strategy = strategyFor(event.request);
+  if (!strategy) return;
+  const request = event.request.mode === 'navigate' && event.request.url.startsWith(APP_BASE.href)
+    ? new Request(new URL('index.html', APP_BASE)) : event.request;
+  event.respondWith(strategy(request, event));
 });

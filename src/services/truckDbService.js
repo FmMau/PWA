@@ -1,4 +1,4 @@
-import { openDB } from "https://esm.sh/idb@8";
+import { openDB } from "../vendor/idb.js";
 
 // Base independiente para conservar los reportes ciudadanos existentes.
 const STORE = "solicitudes";

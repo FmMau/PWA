@@ -41,8 +41,9 @@ export function initCacheDebug() {
       if (button.dataset.cacheAction === 'delete') {
         const deleted = await cacheDebug.delete(document.getElementById('cache-url').value);
         output.textContent = deleted ? 'Entrada eliminada con cache.delete().' : 'La entrada no existe.';
-      } else if (button.dataset.cacheAction === 'sample') {
-        const response = await fetch(new URL('data/cache-demo.json', APP_BASE), { cache: 'no-store' });
+      } else if (['sample', 'swr'].includes(button.dataset.cacheAction)) {
+        const resource = button.dataset.cacheAction === 'swr' ? 'data/avisos.json' : 'data/cache-demo.json';
+        const response = await fetch(new URL(resource, APP_BASE), { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         output.textContent = await response.text();
       } else {
@@ -63,7 +64,8 @@ export function cacheDebugPanel() {
     <button class="diagnostic-clear" data-cache-action="list">Listar entradas</button>
     <label>URL de la entrada <input id="cache-url" value="data/cache-demo.json"></label>
     <button class="diagnostic-clear" data-cache-action="delete">Eliminar entrada</button>
-    <button class="diagnostic-clear" data-cache-action="sample">Consultar dato de prueba</button>
+    <button class="diagnostic-clear" data-cache-action="sample">Consultar suministro (Network First)</button>
+    <button class="diagnostic-clear" data-cache-action="swr">Consultar avisos (SWR)</button>
     <pre id="cache-output" role="status" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
   </section>`;
 }

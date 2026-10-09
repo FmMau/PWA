@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "avisos": [
+    { "colonia": "Centro", "mensaje": "Revisión preventiva de la red de agua." },
+    { "colonia": "Camino Real", "mensaje": "Distribución de agua programada por la mañana." }
+  ]
+}
