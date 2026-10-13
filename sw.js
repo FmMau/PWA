@@ -1,7 +1,11 @@
-const CACHE_VERSION = 'aquapaz-app-shell-v4';
+const CACHE_VERSION = 'aquapaz-app-shell-v8';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
-  'index.html', 'styles/shell.css', 'styles/main.css', 'src/main.js', 'src/router/router.js',
+  'index.html', 'manifest.json',
+  'icons/droplet-solid-full.svg', 'icons/logo-1024.png', 'icons/manifest-icon-192.png', 'icons/manifest-icon-512.png',
+  'icons/manifest-icon-512.maskable.png', 'icons/apple-icon-180.png', 'icons/favicon-32.png',
+  'splash/apple-splash-1170-2532.jpg',
+  'styles/shell.css', 'styles/main.css', 'src/main.js', 'src/router/router.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js',
   ...['About', 'Dashboard', 'Diagnostics', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks', 'Weather'].map(n => `src/views/${n}View.js`),
