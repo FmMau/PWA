@@ -220,6 +220,30 @@ a {
   gap: 0.8rem;
 }
 
+.install-app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.85rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: var(--blue);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.install-app-button:hover {
+  background: var(--blue-dark);
+}
+
+.install-app-button[hidden] {
+  display: none;
+}
+
 .notification-button {
   display: grid;
   place-items: center;

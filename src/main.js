@@ -1,6 +1,8 @@
 import Router from "./router/router.js";
 import { initConnectionStatus } from './pwa/connectionStatus.js';
 import { registerSW } from "./pwa/registerSW.js";
+import { initInstallPrompt } from "./pwa/installPrompt.js";
+import { initInstallButton } from "./pwa/installButton.js";
 window.addEventListener("load", registerSW, { once: true });
 
 import DashboardView from "./views/DashboardView.js";
@@ -17,6 +19,7 @@ import WeatherView, {
 import DiagnosticsView, {
   initDiagnostics,
 } from "./views/DiagnosticsView.js";
+import InstallView from "./views/InstallView.js";
 import { initTheme } from "./utils/theme.js";
 import {
   registerVisit,
@@ -63,6 +66,10 @@ const routes = [
     path: "/diagnostico",
     view: DiagnosticsView,
   },
+  {
+    path: "/instalacion",
+    view: InstallView,
+  },
 ];
 
 const app = document.getElementById("app");
@@ -72,6 +79,8 @@ const router = new Router(routes, app);
 registerVisit();
 initTheme();
 initConnectionStatus();
+initInstallPrompt();
+initInstallButton();
 initWeatherFilters();
 initDiagnostics();
 router.init();
