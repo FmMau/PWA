@@ -1,4 +1,5 @@
-const CACHE_VERSION = 'aquapaz-app-shell-v9';
+import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
+const CACHE_VERSION = 'aquapaz-app-shell-v13';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -8,10 +9,11 @@ const LOCAL_RESOURCES = [
   'styles/shell.css', 'styles/main.css', 'src/main.js', 'src/router/router.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js',
-  ...['About', 'Dashboard', 'Diagnostics', 'Install', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks', 'Weather'].map(n => `src/views/${n}View.js`),
-  ...['WeatherService', 'dbService', 'itemsService', 'truckDbService'].map(n => `src/services/${n}.js`),
+  ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),
+  ...['WeatherService', 'dbService', 'itemsService', 'truckDbService', 'apiService', 'outboxService'].map(n => `src/services/${n}.js`),
+  'src/pwa/reportSync.js', 'src/views/AuthView.js', 'src/views/apiViews.js',
   ...['cookies', 'slugify', 'storage', 'theme', 'visitCookie'].map(n => `src/utils/${n}.js`),
-  'src/vendor/idb.js', 'data/cache-demo.json', 'data/avisos.json',
+  'src/vendor/idb.js', 'data/cache-demo.json', 'data/avisos.json', 'data/colonias.json',
 ];
 const ICON_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/';
 const EXTERNAL_RESOURCES = [`${ICON_BASE}css/all.min.css`,
@@ -19,7 +21,9 @@ const EXTERNAL_RESOURCES = [`${ICON_BASE}css/all.min.css`,
 const APP_SHELL = [...LOCAL_RESOURCES.map(p => new URL(p, APP_BASE).href), ...EXTERNAL_RESOURCES];
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    await (await caches.open(CACHE_VERSION)).addAll(APP_SHELL);
+    const cache = await caches.open(CACHE_VERSION);
+    await cache.addAll(LOCAL_RESOURCES.map(p => new URL(p, APP_BASE).href));
+    await Promise.allSettled(EXTERNAL_RESOURCES.map(url => cache.add(url)));
     console.info('[SW] Precaching completo', CACHE_VERSION, APP_SHELL);
     await self.skipWaiting();
   })());
@@ -34,6 +38,12 @@ self.addEventListener('activate', event => {
 });
 self.addEventListener('message', event => {
   if (event.data?.type === 'CACHE_VERSION') event.ports[0]?.postMessage(CACHE_VERSION);
+});
+self.addEventListener('sync', event => {
+  if (event.tag === SYNC_TAG) {
+    console.info('[SW] sync', event.tag);
+    event.waitUntil(flushOutbox());
+  }
 });
 function emergency(request) {
   const url = new URL(request.url);
@@ -81,6 +91,8 @@ function staleWhileRevalidate(request, event) {
 function strategyFor(request) {
   const url = new URL(request.url);
   if (request.method !== 'GET') return null;
+  // Datos autenticados se guardan por cuenta en IndexedDB, nunca en la caché pública.
+  if (request.headers.has('Authorization') || /\/api(?:\/|$)/.test(url.pathname)) return null;
   if (url.origin === APP_BASE.origin && url.pathname.startsWith(APP_BASE.pathname)) {
     if (url.pathname === new URL('data/cache-demo.json', APP_BASE).pathname) return networkFirst;
     if (url.pathname === new URL('data/avisos.json', APP_BASE).pathname) return staleWhileRevalidate;

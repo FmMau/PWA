@@ -1,284 +1,65 @@
-import { safeSessionStorage } from "../utils/storage.js";
-import {
-  addReporte,
-  getAllReportes,
-  getReportesByTipo,
-  deleteReporte,
-} from "../services/dbService.js";
-
-const SS_KEY  = "aquapaz-reportes-filtro";
-const TIPOS   = ["Fuga", "Desabasto", "Baja presión"];
-const FILTROS = ["Todos", ...TIPOS];
-const ESTADOS = ["Pendiente", "En revisión", "Atendido"];
-
-function showToast(msg, tipo = "error") {
-  const prev = document.getElementById("reports-toast");
-  if (prev) prev.remove();
-
-  const el = document.createElement("div");
-  el.id        = "reports-toast";
-  el.className = `reports-toast reports-toast--${tipo}`;
-  el.innerHTML = `
-    <i class="fa-solid ${tipo === "success" ? "fa-circle-check" : "fa-circle-exclamation"}"></i>
-    ${msg}
-  `;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 4000);
-}
-
-function estadoBadge(estado) {
-  const map = {
-    "Pendiente":   "badge--warning",
-    "En revisión": "badge--info",
-    "Atendido":    "badge--success",
-  };
-  return `<span class="badge ${map[estado] ?? ""}">${estado}</span>`;
-}
-
-function reportCard(r) {
-  return `
-    <article class="card reporte-card" data-id="${r.id}">
-      <div class="reporte-card-header">
-        ${estadoBadge(r.estado)}
-        <button class="reporte-delete-btn" data-id="${r.id}" aria-label="Eliminar reporte">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      </div>
-
-      <h3>${r.titulo}</h3>
-      <p>${r.descripcion}</p>
-
-      <div class="reporte-meta">
-        <span><i class="fa-solid fa-location-dot"></i> ${r.colonia}</span>
-        <span><i class="fa-solid fa-tag"></i> ${r.tipo}</span>
-      </div>
-    </article>
-  `;
-}
-
-function formTemplate() {
-  const tipoOptions   = TIPOS.map(t  => `<option value="${t}">${t}</option>`).join("");
-  const estadoOptions = ESTADOS.map(e => `<option value="${e}">${e}</option>`).join("");
-
-  return `
-    <form class="reporte-form" id="reporte-form" novalidate>
-
-      <div class="reporte-form-title">
-        <i class="fa-solid fa-circle-plus"></i>
-        <span>Nuevo reporte</span>
-      </div>
-
-      <div class="reporte-form-fields">
-
-        <div class="field-group">
-          <label for="r-titulo">Título <span class="required">*</span></label>
-          <input
-            type="text"
-            id="r-titulo"
-            name="titulo"
-            placeholder="Ej. Fuga en calle principal"
-            autocomplete="off"
-            required
-          />
-        </div>
-
-        <div class="field-group">
-          <label for="r-desc">Descripción <span class="required">*</span></label>
-          <textarea
-            id="r-desc"
-            name="descripcion"
-            rows="3"
-            placeholder="Describe el problema con el mayor detalle posible..."
-            required
-          ></textarea>
-        </div>
-
-        <div class="reporte-form-row">
-          <div class="field-group">
-            <label for="r-colonia">Colonia <span class="required">*</span></label>
-            <input
-              type="text"
-              id="r-colonia"
-              name="colonia"
-              placeholder="Ej. Centro"
-              autocomplete="off"
-              required
-            />
-          </div>
-
-          <div class="field-group">
-            <label for="r-tipo">Tipo <span class="required">*</span></label>
-            <select id="r-tipo" name="tipo" required>
-              <option value="">— Selecciona —</option>
-              ${tipoOptions}
-            </select>
-          </div>
-
-          <div class="field-group">
-            <label for="r-estado">Estado</label>
-            <select id="r-estado" name="estado">
-              ${estadoOptions}
-            </select>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="reporte-form-footer">
-        <span id="reporte-form-error" class="field-error" aria-live="polite"></span>
-        <button type="submit" id="btn-submit-reporte" class="btn-primary">
-          <i class="fa-solid fa-paper-plane"></i> Guardar reporte
-        </button>
-      </div>
-
-    </form>
-  `;
-}
-
+import { context, resource, request, escapeHTML as e } from '../services/apiService.js';
+import { enqueueReport, records } from '../services/outboxService.js';
+import { getAllReportes } from '../services/dbService.js';
+import { retryReports, syncMode } from '../pwa/reportSync.js';
+const states = {no_agua:'Sin agua', baja_presion:'Baja presión', tengo_agua:'Con agua'};
 function template() {
-  const filtroActivo = safeSessionStorage.getItem(SS_KEY) || "Todos";
-
-  const chips = FILTROS.map(
-    (f) => `
-      <button
-        class="filter-chip ${f === filtroActivo ? "filter-chip--active" : ""}"
-        data-filter="${f}"
-      >${f}</button>
-    `
-  ).join("");
-
-  return `
-    <section class="page">
-
-      <div class="page-header">
-        <div>
-          <span class="page-eyebrow">
-            Operación
-          </span>
-
-          <h2>Reportes ciudadanos</h2>
-
-          <p>
-            Registra y da seguimiento a las incidencias relacionadas
-            con el suministro de agua. Los datos se guardan localmente.
-          </p>
-        </div>
-      </div>
-
-      ${formTemplate()}
-
-      <div class="filter-bar" id="filter-bar">${chips}</div>
-
-      <div id="reports-list">
-        <div class="loading-inline">
-          <div class="loading-circle loading-circle--sm"></div>
-          <span>Cargando reportes…</span>
-        </div>
-      </div>
-
-    </section>
-  `;
+ return `<section class="page" id="reports-page"><div class="page-header"><div><h2>Reportes ciudadanos</h2><p>Se guardan primero en este dispositivo y se envían con tu cuenta.</p></div></div>
+ <p id="sync-mode" role="status"></p><button class="btn-primary" id="retry-reports">Reintentar ahora</button>
+ <form class="reporte-form" id="reporte-form"><h3>Nuevo reporte</h3><p id="report-colonia"></p><div class="reporte-form-fields">
+ <div class="field-group"><label for="r-tipo">Tipo</label><select id="r-tipo" name="tipo"><option value="agua">Suministro de agua</option><option value="fuga">Fuga</option></select></div>
+ <div class="field-group"><label for="r-estado">Estado del agua</label><select id="r-estado" name="estado">${Object.entries(states).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></div>
+ <div class="field-group"><label for="r-comment">Comentario</label><textarea id="r-comment" name="comentario" maxlength="2000" rows="3"></textarea></div></div><button class="btn-primary" type="submit">Guardar reporte</button></form>
+ <p id="report-feedback" role="status" aria-live="polite"></p><h3>Pendientes de envío</h3><div id="outbox-list"></div><h3>Envíos confirmados por el servidor</h3><div id="receipt-list"></div>
+ <h3>Reportes de tu colonia</h3><button id="refresh-reports" class="btn-primary">Actualizar reportes</button><p id="remote-status"></p><div id="reports-list"></div>
+ <details><summary>Registros locales anteriores (conservados)</summary><p>Usan el formato anterior y no se envían automáticamente.</p><div id="legacy-reports"></div></details></section>`;
 }
-
-async function renderList(container, filtro) {
-  const list = container.querySelector("#reports-list");
-  list.innerHTML = "";
-
-  const reportes =
-    filtro === "Todos"
-      ? await getAllReportes()
-      : await getReportesByTipo(filtro);
-
-  if (!reportes.length) {
-    const msg =
-      filtro === "Todos"
-        ? "Aún no hay reportes registrados. Usa el formulario para agregar el primero."
-        : `No hay reportes de tipo "${filtro}".`;
-
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3>Sin reportes</h3>
-        <p>${msg}</p>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = `<div class="grid">${reportes.map(reportCard).join("")}</div>`;
-}
-
 async function init(container) {
-  const filterBar = container.querySelector("#filter-bar");
-  const form      = container.querySelector("#reporte-form");
-  const errorSpan = container.querySelector("#reporte-form-error");
-
-  const getFiltroActivo = () => safeSessionStorage.getItem(SS_KEY) || "Todos";
-
-  await renderList(container, getFiltroActivo());
-
-  filterBar.addEventListener("click", async (e) => {
-    const btn = e.target.closest("[data-filter]");
-    if (!btn) return;
-
-    const filtro = btn.dataset.filter;
-    safeSessionStorage.setItem(SS_KEY, filtro);
-
-    filterBar
-      .querySelectorAll(".filter-chip")
-      .forEach((c) => c.classList.remove("filter-chip--active"));
-    btn.classList.add("filter-chip--active");
-
-    await renderList(container, filtro);
-  });
-
-  container
-    .querySelector("#reports-list")
-    .addEventListener("click", async (e) => {
-      const btn = e.target.closest(".reporte-delete-btn");
-      if (!btn) return;
-
-      const id = Number(btn.dataset.id);
-      await deleteReporte(id);
-      await renderList(container, getFiltroActivo());
-    });
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    errorSpan.textContent = "";
-
-    const data = {
-      titulo:      form.titulo.value.trim(),
-      descripcion: form.descripcion.value.trim(),
-      colonia:     form.colonia.value.trim(),
-      tipo:        form.tipo.value,
-      estado:      form.estado.value,
-      fecha:       new Date().toISOString(),
-    };
-
-    if (!data.titulo || !data.descripcion || !data.colonia || !data.tipo) {
-      errorSpan.textContent = "Completa todos los campos obligatorios (*).";
-      return;
-    }
-
-    const submitBtn = form.querySelector("#btn-submit-reporte");
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando…';
-
-    try {
-      await addReporte(data);
-      form.reset();
-      await renderList(container, getFiltroActivo());
-      showToast("Reporte guardado correctamente.", "success");
-    } catch (err) {
-      console.error("[dbService] Error al guardar reporte:", err);
-      errorSpan.textContent = "No se pudo guardar el reporte. Intenta de nuevo.";
-      showToast("Error al guardar en la base de datos local.", "error");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Guardar reporte';
-    }
-  });
+ const page = container.querySelector('#reports-page'), form = page.querySelector('form'), feedback = page.querySelector('#report-feedback');
+ const {base,session} = await context();
+ page.querySelector('#report-colonia').textContent = session ? `Colonia de tu cuenta: ${session.user.colonia}` : 'Inicia sesión para registrar reportes.';
+ form.querySelector('button').disabled = !session;
+ async function local() {
+  if (!page.isConnected) return;
+  page.querySelector('#sync-mode').textContent = `${navigator.onLine?'Con conexión':'Sin conexión'} · ${syncMode()}`;
+  const visible = list=>list.filter(x=>x.base===base && x.owner===session?.user.id);
+  const pending=visible(await records('outbox')), sent=visible(await records('receipts'));
+  page.querySelector('#outbox-list').innerHTML = pending.length ? pending.map(x=>`<article class="card"><strong>Pendiente · ${e(states[x.payload.estado])}</strong><p>${e(x.payload.comentario)}</p><p>${e(x.payload.colonia)} · ${e(x.id)}</p><p>Intentos: ${x.attempts} · ${e(x.error||'Esperando envío')}</p></article>`).join('') : '<p>Cola vacía para esta cuenta y servidor.</p>';
+  page.querySelector('#receipt-list').innerHTML = sent.length ? sent.slice(-20).reverse().map(x=>`<p>Envío confirmado · reporte #${e(x.server.id)} · ${e(x.payload.comentario)} · ${e(x.sent)}</p>`).join('') : '<p>Aún no hay envíos confirmados.</p>';
+ }
+ async function remote() {
+  try {
+   const result=await resource('/api/reportes');
+   page.querySelector('#remote-status').textContent=`${result.cached?'Copia guardada; no se pudo actualizar':'Datos del servidor'} · ${result.date}`;
+   page.querySelector('#reports-list').innerHTML=result.data.map(r=>`<article class="card"><h3>${e(r.tipo)} · ${e(states[r.estado]||r.estado)}</h3><p>${e(r.comentario)}</p><p>${e(r.colonia)} · #${e(r.id)}</p>${String(r.usuario_id)!==String(session?.user.id)&&!result.cached?`<button data-confirm="${e(r.id)}" data-decision="confirmar">Confirmar</button> <button data-confirm="${e(r.id)}" data-decision="rechazar">Rechazar</button>`:''}</article>`).join('')||'<p>Sin reportes en tu colonia.</p>';
+  } catch(error) {page.querySelector('#remote-status').textContent=error.message;}
+ }
+ const change=()=>{if(!page.isConnected){window.removeEventListener('outbox-change',change);return;} local().catch(console.error);};
+ window.addEventListener('outbox-change',change);
+ window.addEventListener('offline',change,{once:true});
+ form.addEventListener('submit',async event=>{
+  event.preventDefault();const button=form.querySelector('button');button.disabled=true;
+  try {
+   await enqueueReport({tipo:form.elements.tipo.value,estado:form.elements.estado.value,comentario:form.elements.comentario.value.trim()});
+   form.reset();feedback.textContent='Reporte guardado en la cola. Pendiente de confirmación del servidor.';await local();
+   try{await retryReports();feedback.textContent='Envío procesado. Revisa pendientes y confirmaciones.';await remote();}
+   catch(error){feedback.textContent=`Guardado; sigue pendiente: ${error.message}`;}await local();
+  }catch(error){feedback.textContent=`No se pudo guardar: ${error.message}. Tus campos se conservan.`;}
+  finally{button.disabled=false;}
+ });
+ page.querySelector('#retry-reports').addEventListener('click',async event=>{
+  const button=event.target;button.disabled=true;
+  try{await retryReports();feedback.textContent='Reintento terminado. Revisa las confirmaciones.';await remote();}
+  catch(error){feedback.textContent=`Se conserva la cola: ${error.message}`;}
+  finally{await local();button.disabled=false;}
+ });
+ page.querySelector('#refresh-reports').addEventListener('click',remote);
+ page.querySelector('#reports-list').addEventListener('click',async event=>{
+  const button=event.target.closest('[data-confirm]');if(!button)return;button.disabled=true;
+  try{const r=await request(`/api/reportes/${button.dataset.confirm}/confirmar`,{method:'POST',body:{decision:button.dataset.decision}});feedback.textContent=`Decisión registrada. Confirmaciones: ${r.confirmaciones}`;}
+  catch(error){feedback.textContent=error.message;}finally{button.disabled=false;}
+ });
+ page.querySelector('#legacy-reports').innerHTML=(await getAllReportes()).map(r=>`<article class="card"><h3>${e(r.titulo)}</h3><p>${e(r.descripcion)}</p><p>${e(r.colonia)} · ${e(r.tipo)} · ${e(r.estado)}</p></article>`).join('')||'<p>Sin registros anteriores.</p>';
+ await local();await remote();
 }
-
-export default { template, init };
+export default {template,init};

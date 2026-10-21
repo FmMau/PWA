@@ -1,9 +1,12 @@
+import { context } from '../services/apiService.js';
 export default class Router {
   constructor(routes, rootElement) {
     this.routes = routes;
     this.root = rootElement;
 
     window.addEventListener("popstate", () => this.render());
+    window.addEventListener("hashchange", () => this.render());
+    window.addEventListener('auth-change', () => this.render());
 
     document.addEventListener("click", (event) => {
       const link = event.target.closest("[data-link]");
@@ -53,7 +56,20 @@ export default class Router {
   }
 
   async render() {
-    const path = window.location.hash.slice(1) || "/";
+    const revision = this.revision = (this.revision || 0) + 1;
+    let path = window.location.hash.slice(1) || "/";
+    const { session } = await context();
+    if (revision !== this.revision) return;
+    const publicRoute = ['/login', '/registro'].includes(path);
+    const authenticated = !!(session?.token && session?.user?.id);
+    if (!authenticated && !publicRoute) {
+      path = '/login';
+      history.replaceState({}, '', '#/login');
+    } else if (authenticated && publicRoute) {
+      path = '/';
+      history.replaceState({}, '', '#/');
+    }
+    document.body.classList.toggle('auth-page', ['/login', '/registro'].includes(path));
 
     this.root.innerHTML = `
       <div class="loading">

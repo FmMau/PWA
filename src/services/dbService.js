@@ -1,10 +1,10 @@
 import { openDB } from "../vendor/idb.js";
 
 const DB_NAME    = "aquapaz-db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE      = "reportes";
 
-function getDB() {
+export function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE)) {
@@ -13,6 +13,9 @@ function getDB() {
           autoIncrement: true,
         });
         store.createIndex("by-tipo", "tipo");
+      }
+      for (const name of ['outbox', 'settings', 'snapshots', 'receipts']) {
+        if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath: 'id' });
       }
     },
   });

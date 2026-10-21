@@ -19,6 +19,7 @@ export async function registerSW() {
   try {
     const registration = await navigator.serviceWorker.register(swURL.href, {
       scope: APP_BASE.href,
+      type: 'module',
     });
     console.info('[PWA] Registro correcto. Scope:', registration.scope);
     console.info('[PWA] Controller al registrar:', navigator.serviceWorker.controller);
