@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node scripts/serve.cjs",
-    "test": "node scripts/check-routes.cjs"
+    "test": "node scripts/check-routes.cjs",
+    "test:device": "node scripts/check-device-features.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

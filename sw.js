@@ -1,5 +1,5 @@
 import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
-const CACHE_VERSION = 'aquapaz-app-shell-v13';
+const CACHE_VERSION = 'aquapaz-app-shell-v14';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -8,7 +8,7 @@ const LOCAL_RESOURCES = [
   'splash/apple-splash-1170-2532.jpg',
   'styles/shell.css', 'styles/main.css', 'src/main.js', 'src/router/router.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
-  'src/components/ItemCard.js',
+  'src/components/ItemCard.js', 'src/components/ReportLocation.js', 'src/services/geolocationService.js', 'src/services/shareService.js',
   ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),
   ...['WeatherService', 'dbService', 'itemsService', 'truckDbService', 'apiService', 'outboxService'].map(n => `src/services/${n}.js`),
   'src/pwa/reportSync.js', 'src/views/AuthView.js', 'src/views/apiViews.js',
