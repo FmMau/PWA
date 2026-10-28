@@ -1,1 +1,1 @@
-export { MapApiView as default } from './apiViews.js';
+export { default } from './SupplyView.js';

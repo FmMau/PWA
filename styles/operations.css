@@ -1,0 +1,31 @@
+.ops-stats { margin-block: 1.25rem; }
+.ops-stats a { text-decoration: none; transition: border-color .15s; }
+.ops-stats a:hover { border-color: var(--blue); }
+.ops-report-action { color: var(--blue); font-size: .78rem; font-weight: 650; margin-top: .5rem; }
+.ops-panels { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.ops-report-list { padding: 0; margin: 1rem 0 0; list-style: none; }
+.ops-report-list li + li { border-top: 1px solid var(--border); }
+.ops-report-list a { display: block; padding: 1rem 0; color: var(--navy); text-decoration: none; overflow-wrap: anywhere; }
+.ops-report-list a:hover strong { color: var(--blue); }
+.ops-report-list a > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; font-size: .9rem; }
+.ops-report-list p { color: var(--text); line-height: 1.6; font-size: .85rem; margin: .5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ops-report-list a > span { display: block; font-size: .75rem; }
+.colony-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); }
+.colony-filters label { display: grid; gap: .5rem; flex: 1; min-width: 10rem; font-size: .8rem; font-weight: 600; color: var(--text); }
+.colony-filters input, .colony-filters select { width: 100%; min-width: 0; font: inherit; padding: .7rem; border: 1px solid var(--border); border-radius: .65rem; background: var(--surface); color: var(--navy); }
+[data-results-status] { color: var(--text); font-size: .8rem; line-height: 1.6; }
+.colony-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.colony-card { padding: 1.25rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); overflow-wrap: anywhere; }
+.colony-heading { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: .8rem; }
+.colony-heading h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.colony-status { display: inline-block; padding: .3rem .5rem; border-radius: .45rem; background: var(--background); color: var(--text); font-size: .72rem; }
+.colony-status[data-status="incident"] { background: #fff2d3; color: #805207; }
+.colony-status[data-status="water"] { background: #dcf5e6; color: #17633c; }
+.colony-status[data-status="expired"] { border: 1px dashed var(--muted); }
+.colony-observations { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .5rem; margin: 1.25rem 0 .75rem; color: var(--text); font-size: .75rem; }
+.colony-observations strong { display: block; font-size: 1.25rem; color: var(--navy); margin-bottom: .2rem; }
+.colony-bar { display: flex; height: .4rem; overflow: hidden; border-radius: 1rem; background: var(--background); }
+.bar-no-water { background: #d76950; } .bar-low-water { background: #dfad43; } .bar-water { background: #419a7d; }
+.colony-card > p { font-size: .75rem; color: var(--text); line-height: 1.7; margin-bottom: 0; }
+@media(max-width: 64rem) { .ops-panels, .colony-list { grid-template-columns: minmax(0,1fr); } }
+@media(max-width: 32rem) { .ops-stats { grid-template-columns: repeat(2,minmax(0,1fr)); } .ops-stats .stat-card { padding: 1rem; } .ops-stats .stat-value { font-size: 1.7rem; } .colony-filters { display: grid; grid-template-columns: minmax(0,1fr); } }

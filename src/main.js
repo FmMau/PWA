@@ -10,7 +10,6 @@ import { initInstallButton } from "./pwa/installButton.js";
 window.addEventListener("load", registerSW, { once: true });
 
 import DashboardView from "./views/DashboardView.js";
-import MapView from "./views/MapView.js";
 import ReportsView from "./views/ReportsView.js";
 import SupplyView from "./views/SupplyView.js";
 import TrucksView from "./views/TrucksView.js";
@@ -30,10 +29,6 @@ const routes = [
   {
     path: "/",
     view: DashboardView,
-  },
-  {
-    path: "/mapa",
-    view: MapView,
   },
   {
     path: "/reportes",

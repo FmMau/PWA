@@ -57,7 +57,10 @@ export default class Router {
 
   async render() {
     const revision = this.revision = (this.revision || 0) + 1;
-    let path = window.location.hash.slice(1) || "/";
+    const hash = window.location.hash.slice(1) || '/';
+    const separator = hash.indexOf('?');
+    let path = separator < 0 ? hash : hash.slice(0, separator);
+    let query = new URLSearchParams(separator < 0 ? '' : hash.slice(separator + 1));
     const { session } = await context();
     if (revision !== this.revision) return;
     const publicRoute = ['/login', '/registro'].includes(path);
@@ -65,12 +68,18 @@ export default class Router {
     if (!authenticated && !publicRoute) {
       path = '/login';
       history.replaceState({}, '', '#/login');
+      query = new URLSearchParams();
     } else if (authenticated && publicRoute) {
       path = '/';
       history.replaceState({}, '', '#/');
+      query = new URLSearchParams();
+    }
+    if (authenticated && path === '/mapa') {
+      path = '/suministro';
+      history.replaceState({}, '', `#/suministro${query.size ? '?' + query : ''}`);
     }
     document.body.classList.toggle('auth-page', ['/login', '/registro'].includes(path));
-    const titles = {'/':'Resumen', '/mapa':'Mapa de suministro', '/reportes':'Reportes', '/suministro':'Suministro por colonia', '/pipas':'Pedidos de pipas', '/estadisticas':'Estadísticas', '/notificaciones':'Notificaciones', '/operador':'Operador de pipa', '/disponibles':'Pedidos disponibles'};
+    const titles = {'/':'Resumen', '/reportes':'Reportes', '/suministro':'Suministro por colonia', '/pipas':'Pedidos de pipas', '/estadisticas':'Estadísticas', '/notificaciones':'Notificaciones', '/operador':'Operador de pipa', '/disponibles':'Pedidos disponibles'};
     document.querySelectorAll('.sidebar-nav a').forEach(link => {
       if (link.getAttribute('href') === `#${path}`) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
@@ -109,7 +118,7 @@ export default class Router {
       document.title = `AquaPaz · ${titles[path] || 'Centro de Control'}`;
 
       if (typeof viewModule.init === "function") {
-        await viewModule.init(this.root, match.params);
+        await viewModule.init(this.root, { ...match.params, query });
       }
 
     } else {

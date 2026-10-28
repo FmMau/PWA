@@ -17,7 +17,7 @@ function managementTemplate(ctx) {
       <label class="inbox-search">Buscar<input name="q" type="search" maxlength="100" placeholder="Folio, colonia o comentario"></label>
       <label>Colonia<select name="colonia">${options([['','Todas las colonias'], ...ctx.colonias.map(c => [c,c])])}</select></label>
       <label>Tipo<select name="tipo">${options([['','Todos los tipos'],['agua','Suministro'],['fuga','Fuga']])}</select></label>
-      <label>Atención<select name="estado_atencion">${options([['','Todos los estados'],...Object.entries(labels)])}</select></label>
+      <label>Atención<select name="estado_atencion">${options([['','Todos los estados'],['pendientes','Pendientes (todos)'],...Object.entries(labels)])}</select></label>
       <label>Responsable<select name="responsable_id">${options([['','Todos'],['sin_asignar','Sin asignar'],...ctx.responsables.map(r => [r.id,r.nombre])])}</select></label>
       <label>Desde<input name="desde" type="date"></label><label>Hasta<input name="hasta" type="date"></label>
       <div class="inbox-filter-actions"><button class="btn-primary" type="submit">Aplicar filtros</button><button class="btn-secondary" type="reset">Limpiar filtros</button></div>
@@ -31,7 +31,7 @@ function managementTemplate(ctx) {
 
 export default {
   template: () => '<div id="reports-entry"><p role="status">Comprobando acceso a la bandeja de gestión…</p></div>',
-  async init(container) {
+  async init(container, { query = new URLSearchParams() } = {}) {
     const entry = container.querySelector('#reports-entry');
     let ctx;
     try {
@@ -47,7 +47,7 @@ export default {
         entry.innerHTML = `<div class="empty-state dashboard-empty"><h2>No se pudo verificar el acceso</h2><p>${e(error.message)}</p><button class="btn-primary" data-retry-access>Reintentar</button></div>`;
         entry.querySelector('[data-retry-access]').addEventListener('click', () => {
           entry.innerHTML = '<p role="status">Comprobando acceso…</p>';
-          this.init(container);
+          this.init(container, { query });
         });
       }
       return;
@@ -62,6 +62,23 @@ export default {
     const detail = page.querySelector('#detail-content');
     const detailStatus = page.querySelector('#detail-status');
     let pageNumber = 1, lastPage = 1, filtersApplied = {}, listRevision = 0, detailRevision = 0, selected = null, saving = false;
+    function selectedFilters() {
+      const values = Object.fromEntries(new FormData(filters));
+      if (values.estado_atencion === 'pendientes') { delete values.estado_atencion; values.pendientes = 'true'; }
+      return Object.fromEntries(Object.entries(values).filter(([,value]) => value));
+    }
+    for (const name of ['q','colonia','tipo','estado_atencion','responsable_id','desde','hasta']) {
+      const input = filters.elements[name];
+      if (query.has(name)) input.value = query.get(name);
+    }
+    if (query.get('pendientes') === 'true') filters.elements.estado_atencion.value = 'pendientes';
+    filtersApplied = selectedFilters();
+    function rememberFilters(reportId) {
+      if (!page.isConnected) return;
+      const params = new URLSearchParams(filtersApplied);
+      if (reportId) params.set('reporte', reportId);
+      history.replaceState({}, '', `#/reportes${params.size ? '?' + params : ''}`);
+    }
     const controls = () => {
       page.querySelector('#inbox-prev').disabled = pageNumber <= 1;
       page.querySelector('#inbox-next').disabled = pageNumber >= lastPage;
@@ -131,20 +148,20 @@ export default {
       event.preventDefault();
       const values = Object.fromEntries(new FormData(filters));
       if (values.desde && values.hasta && values.desde > values.hasta) { status.textContent = 'La fecha inicial debe ser anterior o igual a la final.'; return; }
-      filtersApplied = Object.fromEntries(Object.entries(values).filter(([,value]) => value));
-      pageNumber = 1; loadList();
+      filtersApplied = selectedFilters();
+      pageNumber = 1; rememberFilters(); loadList();
     });
-    filters.addEventListener('reset', () => { filtersApplied = {}; pageNumber = 1; loadList(); });
+    filters.addEventListener('reset', () => { filtersApplied = {}; pageNumber = 1; rememberFilters(); loadList(); });
     page.querySelector('#refresh-inbox').addEventListener('click', loadList);
     page.querySelector('#inbox-prev').addEventListener('click', () => { if (pageNumber > 1) { pageNumber--; loadList(); } });
     page.querySelector('#inbox-next').addEventListener('click', () => { if (pageNumber < lastPage) { pageNumber++; loadList(); } });
     results.addEventListener('click', event => {
       const button = event.target.closest('[data-detail]');
-      if (button) { dialog.showModal(); loadDetail(button.dataset.detail); }
+      if (button) { rememberFilters(button.dataset.detail); dialog.showModal(); loadDetail(button.dataset.detail); }
     });
-    page.querySelector('#close-detail').addEventListener('click', () => { if (!saving) dialog.close(); });
-    dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); });
-    dialog.addEventListener('close', () => { detailRevision++; selected = null; detail.innerHTML = ''; });
+    page.querySelector('#close-detail').addEventListener('click', () => { if (!saving) { rememberFilters(); dialog.close(); } });
+    dialog.addEventListener('cancel', event => { if (saving) event.preventDefault(); else rememberFilters(); });
+    dialog.addEventListener('close', () => { detailRevision++; selected = null; detail.innerHTML = ''; rememberFilters(); });
     detail.addEventListener('click', event => {
       if (event.target.closest('[data-reload-detail]') && selected && !saving) loadDetail(selected.id);
     });
@@ -176,5 +193,9 @@ export default {
       }
     });
     await loadList();
+    if (page.isConnected && /^[1-9]\d*$/.test(query.get('reporte') || '')) {
+      dialog.showModal();
+      await loadDetail(query.get('reporte'));
+    }
   },
 };
