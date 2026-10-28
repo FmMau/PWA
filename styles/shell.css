@@ -458,3 +458,15 @@ footer {
 }
 .connection-status { font-size: .8rem; padding: .45rem .7rem; border-radius: .6rem; background: #dcfce7; color: #14532d; max-width: 240px; }
 .connection-status[data-offline="true"] { background: #fef3c7; color: #78350f; }
+
+/* Navegación y controles del gestor */
+.sidebar-nav a[aria-current="page"] { background: var(--blue-light); color: var(--blue); box-shadow: inset 3px 0 var(--blue); }
+.topbar-button { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; flex-shrink: 0; border: 1px solid var(--border); border-radius: .8rem; background: var(--surface); color: var(--text); cursor: pointer; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.topbar-actions { flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 47.99rem) {
+  .topbar { align-items: flex-start; gap: .75rem; flex-wrap: wrap; }
+  .topbar-actions { gap: .4rem; }
+  .connection-status { max-width: 100%; }
+  .page-header h2 { font-size: 1.5rem; }
+}

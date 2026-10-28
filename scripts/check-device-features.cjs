@@ -39,7 +39,8 @@ let chromium;try{({chromium}=require('playwright'));}catch{({chromium}=require('
   await page.evaluate(()=>{Object.defineProperty(navigator.geolocation,'getCurrentPosition',{configurable:true,value:(ok,fail)=>fail({code:3})});});
   await page.locator('#locate-report').click();await page.waitForFunction(()=>document.querySelector('#geo-status').textContent.includes('tiempo de espera'));pass('Timeout código 3 con mensaje distinto');
   await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
-  assert.ok((await page.evaluate(()=>caches.keys())).includes('aquapaz-app-shell-v14'));
+  const cacheVersion=fs.readFileSync('sw.js','utf8').match(/const CACHE_VERSION = '([^']+)'/)[1];
+  assert.ok((await page.evaluate(()=>caches.keys())).includes(cacheVersion));
   await ctx.setOffline(true);await page.reload();await page.locator('#share-report').waitFor();
   await page.locator('#report-address').fill('Dirección guardada sin red');await page.locator('#r-comment').fill('Fuga de prueba sin conexión');
   await page.locator('[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#outbox-list').textContent.includes('Dirección guardada sin red'));

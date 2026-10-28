@@ -1,3 +1,15 @@
+.dashboard-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.scope-banner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; border: 1px solid var(--border); border-left: 4px solid var(--blue); border-radius: .8rem; background: var(--surface); color: var(--text); line-height: 1.6; font-size: .85rem; }
+.scope-banner strong { color: var(--navy); font-size: 1rem; }
+.scope-banner a, .dashboard-shortcuts { color: var(--blue); }
+.dashboard-shortcuts a { text-decoration: none; color: var(--navy); transition: border-color .15s; }
+.dashboard-shortcuts a:hover { border-color: var(--blue); }
+.dashboard-shortcuts h3 { margin: .4rem 0; }
+.dashboard-shortcuts p, .dashboard-note, [data-source] { color: var(--text); font-size: .85rem; line-height: 1.6; }
+.dashboard-note { margin: 1rem 0 1.5rem; }
+.dashboard-empty { padding: 2rem; text-align: center; }
+.dashboard-empty p { color: var(--text); }
+[data-content] { overflow-wrap: anywhere; }
 .page {
   width: 100%;
 }
@@ -1174,3 +1186,10 @@
   .auth-content { padding: 2rem 1.5rem; }
   .auth-row { grid-template-columns: 1fr; }
 }
+
+/* Formularios y tarjetas del centro de control */
+.reporte-form { display: grid; gap: 1rem; }
+.reporte-form input, .reporte-form select, .reporte-form textarea { min-width: 0; background: var(--surface); color: var(--navy); border-color: var(--border); }
+.reporte-form > button { justify-self: start; }
+[data-content] > .card { margin-block: 1rem; }
+@media (min-width: 70rem) { .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

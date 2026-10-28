@@ -31,7 +31,12 @@ export async function request(path, { method = 'GET', body, publicAccess = false
       headers: { ...(body ? {'Content-Type': 'application/json'} : {}), ...(!publicAccess ? {Authorization: `Bearer ${session.token}`} : {}) },
       ...(body ? {body: JSON.stringify(body)} : {}),
     });
-    const data = await response.json();
+    let data;
+    try { data = await response.json(); }
+    catch {
+      if (response.ok) throw new Error('Respuesta inválida del servidor.');
+      data = { error: response.status === 404 ? 'Recurso no disponible en este servidor.' : 'El servidor no pudo procesar la solicitud.' };
+    }
     if (!response.ok) {
       if (response.status === 401 && !publicAccess && typeof window !== 'undefined') {
         const active = await readSetting('session');

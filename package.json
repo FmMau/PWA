@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node scripts/serve.cjs",
     "test": "node scripts/check-routes.cjs",
-    "test:device": "node scripts/check-device-features.cjs"
+    "test:device": "node scripts/check-device-features.cjs",
+    "test:reports": "node scripts/check-report-management.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

@@ -70,16 +70,19 @@ router.init();
 initReportSync();
 async function updateAccountHeader() {
   const {session} = await apiContext();
-  const profile = document.querySelector('.user-profile') || document.querySelector('.user-avatar')?.parentElement;
+  const profile = document.querySelector('.user-info');
   if (profile) {
     const name = profile.querySelector('strong');
     const detail = profile.querySelector('div > span');
     if (name) name.textContent = session?.user.nombre || 'Sin sesión';
     if (detail) detail.textContent = session?.user.colonia || 'Conecta tu cuenta';
+    const avatar = profile.querySelector('.user-avatar');
+    if (avatar) avatar.textContent = session?.user.nombre?.trim().charAt(0).toUpperCase() || 'A';
   }
 }
 window.addEventListener('auth-change', updateAccountHeader);
 updateAccountHeader().catch(console.error);
+document.querySelector('.notification-button').addEventListener('click', () => router.navigate('/notificaciones'));
 
 document.getElementById('logout-button').addEventListener('click', async () => {
   await writeSetting('session', null);

@@ -70,6 +70,13 @@ export default class Router {
       history.replaceState({}, '', '#/');
     }
     document.body.classList.toggle('auth-page', ['/login', '/registro'].includes(path));
+    const titles = {'/':'Resumen', '/mapa':'Mapa de suministro', '/reportes':'Reportes', '/suministro':'Suministro por colonia', '/pipas':'Pedidos de pipas', '/estadisticas':'Estadísticas', '/notificaciones':'Notificaciones', '/operador':'Operador de pipa', '/disponibles':'Pedidos disponibles'};
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      if (link.getAttribute('href') === `#${path}`) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    const title = document.querySelector('.topbar-title');
+    if (title) title.textContent = titles[path] || 'Centro de Control';
 
     this.root.innerHTML = `
       <div class="loading">
@@ -99,7 +106,7 @@ export default class Router {
       typeof viewModule.template === "function"
     ) {
       this.root.innerHTML = viewModule.template(match.params);
-      document.title = `AquaPaz — ${path}`;
+      document.title = `AquaPaz · ${titles[path] || 'Centro de Control'}`;
 
       if (typeof viewModule.init === "function") {
         await viewModule.init(this.root, match.params);
