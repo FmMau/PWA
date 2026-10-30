@@ -8,7 +8,8 @@
     "test": "node scripts/check-routes.cjs",
     "test:device": "node scripts/check-device-features.cjs",
     "test:reports": "node scripts/check-report-management.cjs",
-    "test:operations": "node scripts/check-operations.cjs"
+    "test:operations": "node scripts/check-operations.cjs",
+    "test:trucks": "node scripts/check-truck-management.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

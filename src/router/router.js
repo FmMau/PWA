@@ -79,7 +79,17 @@ export default class Router {
       history.replaceState({}, '', `#/suministro${query.size ? '?' + query : ''}`);
     }
     document.body.classList.toggle('auth-page', ['/login', '/registro'].includes(path));
-    const titles = {'/':'Resumen', '/reportes':'Reportes', '/suministro':'Suministro por colonia', '/pipas':'Pedidos de pipas', '/estadisticas':'Estadísticas', '/notificaciones':'Notificaciones', '/operador':'Operador de pipa', '/disponibles':'Pedidos disponibles'};
+    const titles = {
+      '/': 'Resumen',
+      '/reportes': 'Reportes',
+      '/suministro': 'Suministro por colonia',
+      '/pipas': 'Gestión de pipas',
+      '/mis-pedidos': 'Mis solicitudes de pipa',
+      '/estadisticas': 'Estadísticas',
+      '/notificaciones': 'Notificaciones',
+      '/operador': 'Operador de pipa',
+      '/disponibles': 'Pedidos disponibles',
+    };
     document.querySelectorAll('.sidebar-nav a').forEach(link => {
       if (link.getAttribute('href') === `#${path}`) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');

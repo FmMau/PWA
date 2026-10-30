@@ -1,1 +1,1 @@
-export { TrucksApiView as default } from './apiViews.js';
+export { default } from './TruckManagementView.js';

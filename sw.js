@@ -1,5 +1,5 @@
 import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
-const CACHE_VERSION = 'aquapaz-app-shell-v17';
+const CACHE_VERSION = 'aquapaz-app-shell-v18';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -7,12 +7,14 @@ const LOCAL_RESOURCES = [
   'icons/manifest-icon-512.maskable.png', 'icons/apple-icon-180.png', 'icons/favicon-32.png',
   'splash/apple-splash-1170-2532.jpg',
   'styles/shell.css', 'styles/main.css', 'styles/reports.css', 'styles/operations.css', 'src/main.js', 'src/router/router.js',
+  'styles/trucks.css', 'src/components/TruckManagementPanel.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js', 'src/components/ReportLocation.js', 'src/services/geolocationService.js', 'src/services/shareService.js',
   ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),
   ...['WeatherService', 'dbService', 'itemsService', 'truckDbService', 'apiService', 'outboxService'].map(n => `src/services/${n}.js`),
   'src/pwa/reportSync.js', 'src/views/AuthView.js', 'src/views/apiViews.js', 'src/views/ReportManagementView.js', 'src/views/CitizenReportsView.js',
   'src/views/ManagementDashboardView.js', 'src/views/CitizenDashboardView.js', 'src/views/ColonySupplyView.js',
+  'src/views/TruckManagementView.js', 'src/views/CitizenTrucksView.js',
   ...['cookies', 'slugify', 'storage', 'theme', 'visitCookie'].map(n => `src/utils/${n}.js`),
   'src/vendor/idb.js', 'data/cache-demo.json', 'data/avisos.json', 'data/colonias.json',
 ];

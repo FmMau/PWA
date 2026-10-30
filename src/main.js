@@ -13,6 +13,7 @@ import DashboardView from "./views/DashboardView.js";
 import ReportsView from "./views/ReportsView.js";
 import SupplyView from "./views/SupplyView.js";
 import TrucksView from "./views/TrucksView.js";
+import CitizenTrucksView from './views/CitizenTrucksView.js';
 import StatisticsView from "./views/StatisticsView.js";
 import ItemDetailView from "./views/ItemDetailView.js";
 import { initTheme } from "./utils/theme.js";
@@ -21,6 +22,10 @@ import {
 } from "./utils/visitCookie.js";
 
 const routes = [
+  {
+    path: '/mis-pedidos',
+    view: CitizenTrucksView,
+  },
   { path: '/login', view: LoginView },
   { path: '/registro', view: RegisterView },
   { path: '/notificaciones', view: NotificationsView },
