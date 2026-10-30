@@ -1,5 +1,7 @@
 import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
-const CACHE_VERSION = 'aquapaz-app-shell-v18';
+import { handleNotificationClick } from './src/pwa/notificationClick.js';
+
+const CACHE_VERSION = 'aquapaz-app-shell-v21';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -8,6 +10,8 @@ const LOCAL_RESOURCES = [
   'splash/apple-splash-1170-2532.jpg',
   'styles/shell.css', 'styles/main.css', 'styles/reports.css', 'styles/operations.css', 'src/main.js', 'src/router/router.js',
   'styles/trucks.css', 'src/components/TruckManagementPanel.js',
+  'styles/notifications.css', 'src/pwa/notifications.js', 'src/pwa/notificationButton.js',
+  'src/pwa/notificationClick.js', 'src/services/localNotificationService.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js', 'src/components/ReportLocation.js', 'src/services/geolocationService.js', 'src/services/shareService.js',
   ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),
@@ -47,6 +51,10 @@ self.addEventListener('sync', event => {
     console.info('[SW] sync', event.tag);
     event.waitUntil(flushOutbox());
   }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  handleNotificationClick(event, self.clients);
 });
 function emergency(request) {
   const url = new URL(request.url);

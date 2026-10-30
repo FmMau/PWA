@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="styles/reports.css" />
   <link rel="stylesheet" href="styles/operations.css" />
   <link rel="stylesheet" href="styles/trucks.css" />
+  <link rel="stylesheet" href="styles/notifications.css" />
   <link
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -103,6 +104,27 @@
         <div class="topbar-actions">
           <span id="connection-status" class="connection-status" role="status" aria-live="polite"></span>
 
+          <div class="notification-permission-control">
+            <button
+              id="notify-btn"
+              class="notification-permission-button"
+              type="button"
+              aria-describedby="notification-permission-status"
+            >
+              <i class="fa-regular fa-bell" aria-hidden="true"></i>
+              <span>Activar notificaciones</span>
+            </button>
+            <span id="notification-permission-status" role="status" aria-live="polite"></span>
+            <button
+              id="notification-help-button"
+              class="notification-help-button"
+              type="button"
+              hidden
+            >
+              Cómo habilitarlas
+            </button>
+          </div>
+
           <button id="install-app-button" class="install-app-button" type="button" hidden>
             <i class="fa-solid fa-download" aria-hidden="true"></i>
             <span>Instalar app</span>
@@ -153,6 +175,25 @@
     </div>
 
   </div>
+
+  <dialog id="notification-help" class="notification-help-dialog" aria-labelledby="notification-help-title">
+    <h2 id="notification-help-title">Habilitar notificaciones</h2>
+    <p>El permiso corresponde a este sitio: <strong data-notification-origin></strong>.</p>
+    <ol>
+      <li>Abre el icono de información o controles del sitio junto a la dirección del navegador.</li>
+      <li>En Notificaciones, elige Permitir. También puedes restablecer ese permiso a Preguntar.</li>
+      <li>Si no apareció un cuadro, revisa si hay una campana o un aviso de solicitud bloqueada en la barra de direcciones.</li>
+      <li>Regresa a AquaPaz. El control actualizará el estado; si elegiste Preguntar, vuelve a pulsar Activar notificaciones.</li>
+    </ol>
+    <p>Si el navegador bloquea todas las solicitudes, revisa su configuración de notificaciones. Abre AquaPaz directamente en una pestaña con HTTPS o localhost.</p>
+    <p>La app no puede cambiar un permiso bloqueado. Concederlo habilita los avisos; el aviso se muestra cuando termina la sincronización de reportes.</p>
+    <form method="dialog">
+      <button id="notification-recheck-button" class="notification-permission-button" type="button">
+        Ya revisé los permisos
+      </button>
+      <button class="notification-help-button" type="submit">Cerrar ayuda</button>
+    </form>
+  </dialog>
 
   <script type="module" src="src/main.js"></script>
 

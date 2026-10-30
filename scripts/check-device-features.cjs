@@ -43,7 +43,7 @@ let chromium;try{({chromium}=require('playwright'));}catch{({chromium}=require('
   assert.ok((await page.evaluate(()=>caches.keys())).includes(cacheVersion));
   await ctx.setOffline(true);await page.reload();await page.locator('#share-report').waitFor();
   await page.locator('#report-address').fill('Dirección guardada sin red');await page.locator('#r-comment').fill('Fuga de prueba sin conexión');
-  await page.locator('[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#outbox-list').textContent.includes('Dirección guardada sin red'));
+  await page.locator('#reporte-form [type=submit]').click();await page.waitForFunction(()=>document.querySelector('#outbox-list').textContent.includes('Dirección guardada sin red'));
   pass('Sin conexión: recarga de Reportes y guardado en IndexedDB con dirección');
   await ctx.setOffline(false);await page.evaluate(()=>{Object.defineProperty(navigator,'permissions',{configurable:true,value:undefined});});
   await page.evaluate(async()=>{const {permissionState}=await import('/src/services/geolocationService.js');window.permissionFallback=await permissionState();});

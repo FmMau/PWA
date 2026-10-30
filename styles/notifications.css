@@ -1,0 +1,104 @@
+.notification-permission-control {
+  display: grid;
+  gap: 0.3rem;
+
+  max-width: 15rem;
+}
+
+.notification-permission-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  min-height: 2.5rem;
+  padding: 0.55rem 0.8rem;
+
+  background: var(--surface);
+  color: var(--blue);
+
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+
+  font-size: 0.8rem;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.notification-permission-button:disabled {
+  cursor: default;
+}
+
+.notification-permission-button[hidden] {
+  display: none;
+}
+
+.notification-permission-button[data-permission="granted"] {
+  background: var(--blue-light);
+}
+
+.notification-permission-button[data-permission="denied"] {
+  color: var(--text);
+}
+
+#notification-permission-status {
+  color: var(--text);
+
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.notification-help-button {
+  justify-self: start;
+
+  padding: 0;
+
+  background: transparent;
+  color: var(--blue);
+
+  border: 0;
+
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+
+  cursor: pointer;
+}
+
+.notification-help-dialog {
+  width: min(34rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+
+  padding: 1.5rem;
+
+  background: var(--surface);
+  color: var(--navy);
+
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+
+  overflow-y: auto;
+}
+
+.notification-help-dialog::backdrop {
+  background: #0b203b88;
+}
+
+.notification-help-dialog h2 {
+  margin-top: 0;
+
+  font-size: 1.2rem;
+}
+
+.notification-help-dialog p,
+.notification-help-dialog li {
+  font-size: 0.85rem;
+  line-height: 1.7;
+
+  overflow-wrap: anywhere;
+}
+
+.notification-help-dialog li + li {
+  margin-top: 0.5rem;
+}

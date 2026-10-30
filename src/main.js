@@ -7,6 +7,7 @@ import { initConnectionStatus } from './pwa/connectionStatus.js';
 import { registerSW } from "./pwa/registerSW.js";
 import { initInstallPrompt } from "./pwa/installPrompt.js";
 import { initInstallButton } from "./pwa/installButton.js";
+import { initNotificationButton } from './pwa/notificationButton.js';
 window.addEventListener("load", registerSW, { once: true });
 
 import DashboardView from "./views/DashboardView.js";
@@ -66,6 +67,7 @@ initTheme();
 initConnectionStatus();
 initInstallPrompt();
 initInstallButton();
+initNotificationButton();
 router.init();
 initReportSync();
 async function updateAccountHeader() {

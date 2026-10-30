@@ -1,5 +1,6 @@
 import { getDB } from './dbService.js';
 import { context, request } from './apiService.js';
+import { showReportSyncNotification } from './localNotificationService.js';
 
 export const SYNC_TAG = 'aquapaz-reportes-v1';
 export async function records(store) {
@@ -39,6 +40,7 @@ async function drain(webLock) {
   if (!webLock && !await acquire(db, token)) { db.close(); throw new Error('Hay otro envío en curso. Reintenta en un minuto.'); }
   try {
     const {base, session} = await context();
+    let syncedCount = 0;
     for (const item of await db.getAll('outbox')) {
       if (!session || item.base !== base || item.owner !== session.user.id) continue;
       // Renovación antes de cada petición; nunca mantener una transacción durante fetch.
@@ -51,11 +53,22 @@ async function drain(webLock) {
         await tx.objectStore('receipts').put({...item, server, sent: new Date().toISOString()});
         await tx.objectStore('outbox').delete(item.id);
         await tx.done;
+        syncedCount++;
         console.info('[Outbox] Envío confirmado', server.id);
       } catch (error) {
         await db.put('outbox', {...item, attempts: item.attempts + 1, error: error.message});
         throw error; // El rechazo llega a sync.waitUntil para permitir reintentos.
       } finally { await notify(); }
+    }
+
+    if (syncedCount > 0) {
+      const remaining = (await db.getAll('outbox')).some((item) => (
+        item.base === base && item.owner === session.user.id
+      ));
+
+      if (!remaining) {
+        await showReportSyncNotification({ count: syncedCount, owner: session.user.id, base });
+      }
     }
   } finally {
     const tx = db.transaction('settings', 'readwrite');
