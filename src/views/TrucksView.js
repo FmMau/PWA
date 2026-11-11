@@ -1,1 +1,1 @@
-export { default } from './TruckManagementView.js';
+export { default } from './CitizenTrucksView.js';

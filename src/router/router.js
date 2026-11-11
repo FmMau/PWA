@@ -56,6 +56,8 @@ export default class Router {
   }
 
   async render() {
+    this.cleanup?.();
+    this.cleanup = null;
     const revision = this.revision = (this.revision || 0) + 1;
     const hash = window.location.hash.slice(1) || '/';
     const separator = hash.indexOf('?');
@@ -74,18 +76,17 @@ export default class Router {
       history.replaceState({}, '', '#/');
       query = new URLSearchParams();
     }
-    if (authenticated && path === '/mapa') {
-      path = '/suministro';
-      history.replaceState({}, '', `#/suministro${query.size ? '?' + query : ''}`);
-    }
     document.body.classList.toggle('auth-page', ['/login', '/registro'].includes(path));
     const titles = {
-      '/': 'Resumen',
+      '/': 'Inicio',
+      '/mapa': 'Mapa del agua',
+      '/perfil': 'Mi perfil',
+      '/aquahome': 'AquaHome',
       '/reportes': 'Reportes',
       '/suministro': 'Suministro por colonia',
-      '/pipas': 'Gestión de pipas',
+      '/pipas': 'Pipas',
       '/mis-pedidos': 'Mis solicitudes de pipa',
-      '/estadisticas': 'Estadísticas',
+      '/estadisticas': 'Datos de la comunidad',
       '/notificaciones': 'Notificaciones',
       '/operador': 'Operador de pipa',
       '/disponibles': 'Pedidos disponibles',
@@ -95,7 +96,7 @@ export default class Router {
       else link.removeAttribute('aria-current');
     });
     const title = document.querySelector('.topbar-title');
-    if (title) title.textContent = titles[path] || 'Centro de Control';
+    if (title) title.textContent = titles[path] || 'Tu comunidad, conectada';
 
     this.root.innerHTML = `
       <div class="loading">
@@ -125,10 +126,14 @@ export default class Router {
       typeof viewModule.template === "function"
     ) {
       this.root.innerHTML = viewModule.template(match.params);
-      document.title = `AquaPaz · ${titles[path] || 'Centro de Control'}`;
+      document.title = `AquaPaz · ${titles[path] || 'Tu comunidad, conectada'}`;
 
       if (typeof viewModule.init === "function") {
-        await viewModule.init(this.root, { ...match.params, query });
+        const cleanup = await viewModule.init(this.root, { ...match.params, query });
+        if (typeof cleanup === 'function') {
+          if (revision === this.revision) this.cleanup = cleanup;
+          else cleanup();
+        }
       }
 
     } else {

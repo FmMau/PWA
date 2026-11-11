@@ -2,7 +2,7 @@ import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
 import { handleNotificationClick } from './src/pwa/notificationClick.js';
 import { handlePush } from './src/pwa/pushMessage.js';
 
-const CACHE_VERSION = 'aquapaz-app-shell-v22';
+const CACHE_VERSION = 'aquapaz-app-shell-v23';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -14,6 +14,9 @@ const LOCAL_RESOURCES = [
   'styles/notifications.css', 'src/pwa/notifications.js', 'src/pwa/notificationButton.js',
   'src/pwa/notificationClick.js', 'src/services/localNotificationService.js',
   'src/config.js', 'src/pwa/pushSubscription.js', 'src/pwa/pushMessage.js',
+  'styles/citizen.css', 'src/services/communityService.js', 'src/views/HomeView.js',
+  'src/views/ProfileView.js', 'src/views/AquaHomeView.js', 'data/colonias-lapaz.json',
+  'src/views/OffersView.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js', 'src/components/ReportLocation.js', 'src/services/geolocationService.js', 'src/services/shareService.js',
   ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),

@@ -1,1 +1,1 @@
-export { default } from './ReportManagementView.js';
+export { default } from './CitizenReportsView.js';

@@ -1,6 +1,7 @@
 import Router from "./router/router.js";
 import { LoginView, RegisterView } from './views/AuthView.js';
-import { NotificationsView, OperatorView, AvailableView } from './views/apiViews.js';
+import { NotificationsView, OperatorView } from './views/apiViews.js';
+import AvailableView from './views/OffersView.js';
 import { initReportSync } from './pwa/reportSync.js';
 import { context as apiContext, writeSetting } from './services/apiService.js';
 import { initConnectionStatus } from './pwa/connectionStatus.js';
@@ -16,6 +17,9 @@ import ReportsView from "./views/ReportsView.js";
 import SupplyView from "./views/SupplyView.js";
 import TrucksView from "./views/TrucksView.js";
 import CitizenTrucksView from './views/CitizenTrucksView.js';
+import MapView from './views/MapView.js';
+import ProfileView from './views/ProfileView.js';
+import AquaHomeView from './views/AquaHomeView.js';
 import StatisticsView from "./views/StatisticsView.js";
 import ItemDetailView from "./views/ItemDetailView.js";
 import { initTheme } from "./utils/theme.js";
@@ -24,6 +28,9 @@ import {
 } from "./utils/visitCookie.js";
 
 const routes = [
+  { path: '/mapa', view: MapView },
+  { path: '/perfil', view: ProfileView },
+  { path: '/aquahome', view: AquaHomeView },
   {
     path: '/mis-pedidos',
     view: CitizenTrucksView,
@@ -84,6 +91,7 @@ async function updateAccountHeader() {
   }
 }
 window.addEventListener('auth-change', updateAccountHeader);
+window.addEventListener('profile-change', updateAccountHeader);
 updateAccountHeader().catch(console.error);
 document.querySelector('.notification-button').addEventListener('click', () => router.navigate('/notificaciones'));
 

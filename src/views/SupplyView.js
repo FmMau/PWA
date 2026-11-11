@@ -1,1 +1,1 @@
-export { default } from './ColonySupplyView.js';
+export { default } from './MapView.js';

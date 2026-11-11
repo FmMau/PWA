@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0784cf" />
+  <meta name="theme-color" content="#0077c8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="AquaPaz" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
-  <title>AquaPaz | Centro de Control</title>
+  <title>AquaPaz | Tu comunidad, conectada</title>
 
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="styles/operations.css" />
   <link rel="stylesheet" href="styles/trucks.css" />
   <link rel="stylesheet" href="styles/notifications.css" />
+  <link rel="stylesheet" href="styles/citizen.css" />
   <link
   rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -41,33 +42,31 @@
 
         <div class="brand-text">
           <h1>AquaPaz</h1>
-          <span>Centro de Control</span>
+          <span>Tu comunidad, conectada</span>
         </div>
 
       </div>
 
       <nav class="sidebar-nav">
-        <a href="#/notificaciones" data-link><span class="nav-icon"><i class="fa-solid fa-bell"></i></span><span>Notificaciones</span></a>
-
         <a href="#/" data-link>
           <span class="nav-icon">
             <i class="fa-solid fa-house"></i>
           </span>
-          <span>Resumen</span>
+          <span>Inicio</span>
         </a>
 
-        <a href="#/reportes" data-link>
+        <a href="#/mapa" data-link>
           <span class="nav-icon">
-            <i class="fa-solid fa-triangle-exclamation"></i>
+            <i class="fa-solid fa-map-location-dot"></i>
           </span>
-          <span>Reportes</span>
+          <span>Mapa</span>
         </a>
 
-        <a href="#/suministro" data-link>
+        <a href="#/reportes" class="nav-report" data-link>
           <span class="nav-icon">
-            <i class="fa-solid fa-faucet-drip"></i>
+            <i class="fa-solid fa-circle-plus"></i>
           </span>
-          <span>Suministro por colonia</span>
+          <span>Reportar</span>
         </a>
 
         <a href="#/pipas" data-link>
@@ -81,7 +80,7 @@
           <span class="nav-icon">
             <i class="fa-solid fa-chart-column"></i>
           </span>
-          <span>Estadísticas</span>
+          <span>Datos</span>
         </a>
 
 
@@ -97,7 +96,7 @@
         <div>
           <p class="topbar-eyebrow">AquaPaz</p>
           <span class="topbar-title">
-            Gestión del suministro de agua
+            Tu comunidad, conectada
           </span>
         </div>
 
@@ -144,16 +143,16 @@
           </button>
 
           <button id="logout-button" class="topbar-button" type="button" title="Cerrar sesión" aria-label="Cerrar sesión"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i></button>
-          <div class="user-info">
+          <a class="profile-link" href="#/perfil" data-link aria-label="Abrir mi perfil"><div class="user-info">
             <div class="user-avatar">
               A
             </div>
 
             <div>
-              <strong>Administrador</strong>
-              <span>Centro de Control</span>
+              <strong>Mi cuenta</strong>
+              <span>Tu colonia</span>
             </div>
-          </div>
+          </div></a>
 
         </div>
 
@@ -169,7 +168,7 @@
       </main>
 
       <footer>
-        AquaPaz · Centro de Control
+        AquaPaz · Tu comunidad, conectada · La Paz, B.C.S.
       </footer>
 
     </div>

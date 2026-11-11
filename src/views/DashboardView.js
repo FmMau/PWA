@@ -1,1 +1,1 @@
-export { default } from './ManagementDashboardView.js';
+export { default } from './HomeView.js';

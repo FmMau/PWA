@@ -2,21 +2,21 @@ import {resource,request,context,escapeHTML as e} from '../services/apiService.j
 import {getAllSolicitudes} from '../services/truckDbService.js';
 const field=(name,label,type='text',extra='')=>`<label>${label}<input name="${name}" type="${type}" required ${extra}></label>`;
 const select=(name,label,values)=>`<label>${label}<select name="${name}">${values.map(v=>`<option value="${v}">${v}</option>`).join('')}</select></label>`;
-const form=(id,title,fields)=>`<form id="${id}" class="reporte-form"><h3>${title}</h3>${fields}<button class="btn-primary">${title}</button></form>`;
+const form=(id,title,fields)=>`<form id="${id}" class="reporte-form"><h3>${title}</h3>${fields}<button type="submit" class="btn-primary">${title}</button></form>`;
 const labels = {id:'Folio',nombre:'Nombre',placas:'Placas',telefono:'Teléfono',capacidad:'Capacidad en litros',disponible:'Disponible',colonia:'Colonia',tipo:'Tipo',estado:'Estado',comentario:'Comentario',direccion:'Dirección',referencias:'Referencias',litros:'Litros',fecha:'Fecha',actualizado:'Actualizado',precio_centavos:'Precio en centavos MXN',llegada_estimada_minutos:'Llegada estimada en minutos',cotizacion_notas:'Condiciones',precio_aceptado_en:'Precio aceptado',operador:'Pipa asignada',titulo:'Título',mensaje:'Mensaje',leida:'Leída',evento:'Evento',no_agua:'Vecinos sin agua',baja_presion:'Vecinos con baja presión',tengo_agua:'Vecinos con agua',ultima_actualizacion:'Última observación',expira:'Válido hasta',vigencia:'Vigencia'};
 const values = {no_agua:'Sin agua',baja_presion:'Baja presión',tengo_agua:'Con agua',agua:'Suministro',fuga:'Fuga',solicitada:'Solicitada',asignada:'Asignada',en_camino:'En camino',en_sitio:'En sitio',completada:'Completada',cancelada:'Cancelada'};
 const card=r=>`<article class="card">${Object.entries(r).filter(([k,v])=>v!==null && labels[k]).map(([k,v])=>`<p><strong>${labels[k]}:</strong> ${e(typeof v==='object' ? [v.nombre,v.placas,v.telefono].filter(Boolean).join(' · ') : typeof v==='boolean' ? (v?'Sí':'No') : values[v]||v)}</p>`).join('')}</article>`;
 function apiView(title,path,render,forms='',actions={}) {
- return {template:()=>`<section class="page" data-api-page><div class="page-header"><div><h2>${title}</h2><p><a href="#/operador" data-link>Operador</a></p></div></div><p>Las operaciones de esta sección requieren conexión. Reportes permite guardar sin conexión.</p>${forms}<button data-refresh class="btn-primary">Actualizar</button><p data-feedback role="status" aria-live="polite"></p><p data-source></p><div data-content></div></section>`,
+ return {template:()=>`<section class="page" data-api-page><div class="page-header"><div><span class="page-eyebrow">TU CUENTA AQUAPAZ</span><h2>${title}</h2>${path.startsWith('/api/pipas')?'<nav class="pipa-tabs" aria-label="Pipas"><a href="#/pipas" data-link>Solicitar pipa</a><a href="#/operador" data-link>Mi pipa y entregas</a><a href="#/disponibles" data-link>Pedidos disponibles</a></nav>':'<p>Los avisos de tus pedidos y tu comunidad.</p>'}</div></div>${forms}<button data-refresh class="btn-secondary">Actualizar</button><p data-feedback role="status" aria-live="polite"></p><p data-source></p><div data-content></div></section>`,
  async init(container){
   const page=container.querySelector('[data-api-page]'), feedback=page.querySelector('[data-feedback]');let current;
   async function refresh(){
-   try{current=await resource(path);page.querySelector('[data-source]').textContent=`${current.cached?'Copia guardada; sin actualización de red':'Datos del servidor'} · ${current.date}`;page.querySelector('[data-content]').innerHTML=render(current.data,current.cached);}
+   try{current=await resource(path);if(!page.isConnected)return;page.querySelector('[data-source]').textContent=`${current.cached?'Copia guardada; sin actualización de red':'Datos del servidor'} · ${new Date(current.date).toLocaleString('es-MX')}`;page.querySelector('[data-content]').innerHTML=render(current.data,current.cached);if(path==='/api/pipas/operador'){page.querySelector('#operator').hidden=Boolean(current.data.perfil);page.querySelector('#quote').hidden=!current.data.pedido||current.data.pedido.estado!=='asignada';}}
    catch(error){page.querySelector('[data-source]').textContent=error.message;}
   }
   page.querySelector('[data-refresh]').addEventListener('click',refresh);
   for(const [id,action] of Object.entries(actions)) page.querySelector(`#${id}`)?.addEventListener('submit',async event=>{
-   event.preventDefault();const button=event.target.querySelector('button');button.disabled=true;
+   event.preventDefault();const button=event.target.querySelector('[type=submit]');button.disabled=true;
    try{await action(Object.fromEntries(new FormData(event.target)),current?.data);feedback.textContent='Operación confirmada por el servidor.';event.target.reset();await refresh();}
    catch(error){feedback.textContent=error.message;}finally{button.disabled=false;}
   });
@@ -40,6 +40,13 @@ function apiView(title,path,render,forms='',actions={}) {
   });
   await refresh();
   if(path==='/api/pipas/pedidos'){
+   const orderForm=page.querySelector('#order'),account=await context();
+   if(orderForm){orderForm.elements.colonia.value=account.session?.user.colonia||'';orderForm.elements.telefono.value=account.session?.user.telefono||'';
+    const locate=document.createElement('button');locate.type='button';locate.className='btn-secondary';locate.textContent='Usar mi ubicación para la entrega';orderForm.insertBefore(locate,orderForm.elements.latitud.closest('label'));
+    locate.addEventListener('click',async()=>{locate.disabled=true;try{const {readPosition,locationError}=await import('../services/geolocationService.js');try{const point=await readPosition();orderForm.elements.latitud.value=point.latitude;orderForm.elements.longitud.value=point.longitude;feedback.textContent='Punto de entrega actualizado. Confirma que corresponda a tu dirección.';}catch(error){throw new Error(locationError(error));}}catch(error){feedback.textContent=error.message;}finally{locate.disabled=false;}});
+   }
+  }
+  if(path==='/api/pipas/pedidos'){
    const {readSetting}=await import('../services/apiService.js');
    const {base,session}=await context();
    const draft=session && await readSetting(`pipa-draft|${base}|${session.user.id}`);
@@ -59,9 +66,16 @@ export const TrucksApiView=apiView('Pedidos de pipas','/api/pipas/pedidos',(data
   const key=`pipa-draft|${base}|${session.user.id}`;const body={...data,litros:Number(data.litros),latitud:Number(data.latitud),longitud:Number(data.longitud)};
   const previous=await readSetting(key);
   if(previous&&JSON.stringify(previous.body)!==JSON.stringify(body))throw new Error('Existe una solicitud sin confirmar. Reintenta con los mismos datos antes de crear otra.');
-  const draft=previous||{body,id:crypto.randomUUID()};await writeSetting(key,draft);
-  try { await request('/api/pipas/pedidos',{method:'POST',body:{...body,client_id:draft.id}}); }
-  catch(error) { if (/^(400|401|403):/.test(error.message)) await writeSetting(key,null); throw error; }
+  let draft=previous;
+  if(!draft){
+   const quote=await request('/api/pipas/cotizar',{method:'POST',body:{litros:body.litros,latitud:body.latitud,longitud:body.longitud}});
+   const total=(Number(quote.precio_centavos)/100).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+   if(!Number.isSafeInteger(quote.id)||!Number.isSafeInteger(quote.precio_centavos))throw new Error('No se pudo obtener una cotización válida.');
+   if(!confirm(`Cotización de tu pipa: ${total}. ${quote.prueba?'Tarifa de prueba. ':''}${quote.fuente==='aproximada'?'Distancia y llegada aproximadas. ':''}¿Aceptas este importe y deseas solicitar la pipa?`))throw new Error('No se creó el pedido. Puedes revisar los datos e intentar de nuevo.');
+   draft={body,id:crypto.randomUUID(),quote};await writeSetting(key,draft);
+  }
+  try { await request('/api/pipas/pedidos',{method:'POST',body:{...draft.body,client_id:draft.id,...(draft.quote?{cotizacion_id:draft.quote.id,precio_centavos:draft.quote.precio_centavos,aceptar_cotizacion:true}:{})}}); }
+  catch(error) { if (/^(400|401|403|409):/.test(error.message)) await writeSetting(key,null); throw error; }
   await writeSetting(key,null);
  }
 });
