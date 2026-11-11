@@ -64,9 +64,9 @@ try{({chromium}=require('playwright'));}catch{({chromium}=require('C:/Users/TheM
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Pipas mobile overflow');
     await page.screenshot({path:'test-results/citizen-web/pipas-mobile.png',fullPage:true});
     await page.locator('#order [name=direccion]').fill('Calle de prueba 123');await page.locator('#order [name=referencias]').fill('Ninguna');
-    await page.locator('#order [name=latitud]').fill('24.12');await page.locator('#order [name=longitud]').fill('-110.32');
+    await page.locator('#delivery-coordinates').evaluate(element=>element.open=true);await page.locator('#order [name=latitud]').fill('24.12');await page.locator('#order [name=longitud]').fill('-110.32');
     page.once('dialog',dialog=>dialog.accept());await page.locator('#order [type=submit]').click();
-    await page.waitForFunction(()=>document.querySelector('[data-feedback]').textContent.includes('confirmada'));
+    await page.waitForFunction(()=>document.querySelector('[data-feedback]').textContent.includes('se guardaron'));
     const sentOrder=mutations.find(row=>row.path==='/api/pipas/pedidos');assert.equal(sentOrder.body.cotizacion_id,9);assert.equal(sentOrder.body.aceptar_cotizacion,true);assert.equal(sentOrder.body.precio_centavos,48000);
     await page.goto('http://127.0.0.1:4182/#/disponibles');await page.locator('[data-accept="42"]').waitFor();
     await page.locator('[data-position]').click();await page.waitForFunction(()=>document.querySelector('[data-position-status]').textContent.startsWith('Ubicación compartida'));

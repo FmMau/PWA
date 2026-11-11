@@ -1,6 +1,7 @@
 import Router from "./router/router.js";
 import { LoginView, RegisterView } from './views/AuthView.js';
-import { NotificationsView, OperatorView } from './views/apiViews.js';
+import { OperatorView } from './views/apiViews.js';
+import NotificationsView from './views/NotificationsView.js';
 import AvailableView from './views/OffersView.js';
 import { initReportSync } from './pwa/reportSync.js';
 import { context as apiContext, writeSetting } from './services/apiService.js';

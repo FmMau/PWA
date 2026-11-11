@@ -32,10 +32,10 @@ function paint() {
     unsupported: 'Notificaciones no disponibles',
   };
   const messages = {
-    default: 'Sin solicitar (default)',
-    granted: 'Permitidas (granted)',
-    denied: 'Bloqueadas por el navegador (denied). Revisa los permisos del sitio.',
-    unsupported: 'Requieren un navegador compatible y HTTPS o localhost.',
+    default: '',
+    granted: '',
+    denied: 'Revisa los permisos del sitio para recibir avisos.',
+    unsupported: '',
   };
 
   element.hidden = !supportsNotifications();
@@ -49,8 +49,9 @@ function paint() {
         ? subscribed ? 'Desactivar avisos push' : 'Activar avisos push' : labels[permission];
 
   description.textContent = requestError || (dismissed && permission === 'default'
-    ? 'Sin decisión (default). La solicitud se cerró o el navegador usa un aviso silencioso. Revisa la barra de direcciones.'
+    ? 'Revisa la solicitud de permiso en la barra de direcciones.'
     : messages[permission]);
+  description.hidden = !description.textContent;
 
   if (help) help.hidden = permission !== 'denied' && !dismissed;
 }
