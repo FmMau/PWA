@@ -1,7 +1,8 @@
 import { flushOutbox, SYNC_TAG } from './src/services/outboxService.js';
 import { handleNotificationClick } from './src/pwa/notificationClick.js';
+import { handlePush } from './src/pwa/pushMessage.js';
 
-const CACHE_VERSION = 'aquapaz-app-shell-v21';
+const CACHE_VERSION = 'aquapaz-app-shell-v22';
 const APP_BASE = new URL('./', self.location.href);
 const LOCAL_RESOURCES = [
   'index.html', 'manifest.json',
@@ -12,6 +13,7 @@ const LOCAL_RESOURCES = [
   'styles/trucks.css', 'src/components/TruckManagementPanel.js',
   'styles/notifications.css', 'src/pwa/notifications.js', 'src/pwa/notificationButton.js',
   'src/pwa/notificationClick.js', 'src/services/localNotificationService.js',
+  'src/config.js', 'src/pwa/pushSubscription.js', 'src/pwa/pushMessage.js',
   ...['registerSW', 'connectionStatus', 'diagnostics', 'cacheDebug', 'installPrompt', 'installButton'].map(n => `src/pwa/${n}.js`),
   'src/components/ItemCard.js', 'src/components/ReportLocation.js', 'src/services/geolocationService.js', 'src/services/shareService.js',
   ...['Dashboard', 'ItemDetail', 'Map', 'NotFound', 'Reports', 'Statistics', 'Storage', 'Supply', 'Trucks'].map(n => `src/views/${n}View.js`),
@@ -56,6 +58,7 @@ self.addEventListener('sync', event => {
 self.addEventListener('notificationclick', (event) => {
   handleNotificationClick(event, self.clients);
 });
+self.addEventListener('push', event => handlePush(event, self.registration));
 function emergency(request) {
   const url = new URL(request.url);
   const json = url.pathname.endsWith('.json') || url.hostname === 'api.open-meteo.com';

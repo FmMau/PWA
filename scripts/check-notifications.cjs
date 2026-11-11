@@ -87,6 +87,8 @@ try {
     assert.equal(await page.evaluate(() => window.permissionRequests), 0);
 
     await control.click();
+    await page.waitForFunction(() => document.querySelector('#notify-btn').dataset.permission === 'granted'
+      && !document.querySelector('#notify-btn span').textContent.includes('Solicitando'));
     assert.equal(await page.evaluate(() => window.permissionRequests), 1);
     assert.equal(await control.getAttribute('data-permission'), 'granted');
     assert.equal(await page.evaluate(() => window.permissionHadUserGesture), true);

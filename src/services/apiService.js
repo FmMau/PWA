@@ -1,4 +1,5 @@
 import { getDB } from './dbService.js';
+import { API_BASE } from '../config.js';
 
 export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export async function readSetting(id) {
@@ -16,7 +17,7 @@ export function normalizeBase(value) {
   return url.href.replace(/\/$/, '').replace(/\/api$/, '');
 }
 export async function context() {
-  return { base: await readSetting('apiBase') || 'https://aquapaz-api-production.up.railway.app', session: await readSetting('session') };
+  return { base: await readSetting('apiBase') || API_BASE, session: await readSetting('session') };
 }
 export async function request(path, { method = 'GET', body, publicAccess = false, base, session } = {}) {
   const current = await context();

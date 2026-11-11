@@ -3,6 +3,7 @@ import {
   getPermission,
   enableNotifications,
 } from './notifications.js';
+import { supportsPush, getSubscription, subscribeToPush, unsubscribeFromPush, syncSubscription } from './pushSubscription.js';
 
 const button = () => document.getElementById('notify-btn');
 const status = () => document.getElementById('notification-permission-status');
@@ -11,6 +12,7 @@ let requesting = false;
 let requestError = '';
 let dismissed = false;
 let previousPermission;
+let subscribed = false;
 
 function paint() {
   const element = button();
@@ -36,20 +38,26 @@ function paint() {
     unsupported: 'Requieren un navegador compatible y HTTPS o localhost.',
   };
 
-  if (permission !== 'default') requestError = '';
-
   element.hidden = !supportsNotifications();
   element.dataset.permission = permission;
-  element.disabled = requesting || dismissed || permission !== 'default';
+  element.disabled = requesting || dismissed || permission === 'denied' || permission === 'unsupported'
+    || (permission === 'granted' && !supportsPush());
   element.querySelector('span').textContent = requesting
     ? 'Solicitando permiso…'
-    : dismissed && permission === 'default' ? 'Revisa la solicitud del navegador' : labels[permission];
+    : dismissed && permission === 'default' ? 'Revisa la solicitud del navegador'
+      : permission === 'granted' && supportsPush()
+        ? subscribed ? 'Desactivar avisos push' : 'Activar avisos push' : labels[permission];
 
   description.textContent = requestError || (dismissed && permission === 'default'
     ? 'Sin decisión (default). La solicitud se cerró o el navegador usa un aviso silencioso. Revisa la barra de direcciones.'
     : messages[permission]);
 
   if (help) help.hidden = permission !== 'denied' && !dismissed;
+}
+
+async function refreshPush() {
+  subscribed = Boolean(await getSubscription());
+  paint();
 }
 
 async function watchPermission() {
@@ -67,6 +75,15 @@ export function initNotificationButton() {
 
   paint();
   watchPermission();
+  const synchronize = async () => {
+    try { await syncSubscription(); }
+    catch (error) { requestError = error.message; }
+    await refreshPush();
+  };
+  synchronize().catch(console.warn);
+  window.addEventListener('pwa-registration', () => synchronize().catch(console.warn));
+  window.addEventListener('auth-change', () => synchronize().catch(console.warn));
+  window.addEventListener('online', () => synchronize().catch(console.warn));
 
   const help = document.getElementById('notification-help');
 
@@ -83,20 +100,22 @@ export function initNotificationButton() {
   });
 
   button()?.addEventListener('click', async () => {
-    if (requesting || dismissed || getPermission() !== 'default') return;
+    if (requesting || dismissed || ['denied', 'unsupported'].includes(getPermission())) return;
 
     requesting = true;
     requestError = '';
     paint();
 
     try {
-      const permission = await enableNotifications();
+      const permission = supportsPush()
+        ? subscribed ? (await unsubscribeFromPush(), getPermission()) : await subscribeToPush()
+        : await enableNotifications();
       dismissed = permission === 'default';
-    } catch {
-      requestError = 'No se pudo solicitar el permiso. Intenta de nuevo.';
+    } catch (error) {
+      requestError = error.message || 'No se pudo activar push. Intenta de nuevo.';
     } finally {
       requesting = false;
-      paint();
+      await refreshPush();
     }
   });
 

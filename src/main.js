@@ -8,6 +8,7 @@ import { registerSW } from "./pwa/registerSW.js";
 import { initInstallPrompt } from "./pwa/installPrompt.js";
 import { initInstallButton } from "./pwa/installButton.js";
 import { initNotificationButton } from './pwa/notificationButton.js';
+import { unsubscribeFromPush } from './pwa/pushSubscription.js';
 window.addEventListener("load", registerSW, { once: true });
 
 import DashboardView from "./views/DashboardView.js";
@@ -87,6 +88,8 @@ updateAccountHeader().catch(console.error);
 document.querySelector('.notification-button').addEventListener('click', () => router.navigate('/notificaciones'));
 
 document.getElementById('logout-button').addEventListener('click', async () => {
+  try { await unsubscribeFromPush(); }
+  catch (error) { alert(`No se pudo desvincular este dispositivo: ${error.message}`); return; }
   await writeSetting('session', null);
   window.dispatchEvent(new Event('auth-change'));
 });

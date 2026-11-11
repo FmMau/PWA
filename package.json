@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:push": "node scripts/check-push.cjs",
     "start": "node scripts/serve.cjs",
     "test": "node scripts/check-routes.cjs",
     "test:device": "node scripts/check-device-features.cjs",
